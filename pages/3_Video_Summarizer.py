@@ -136,6 +136,63 @@ def show_downloads(title, summary, transcript):
     st.markdown("</div>", unsafe_allow_html=True)
 
 
+def show_discourse_header(speaker_key, topic_key, scripture_key, lang_key):
+    """Show a bold discourse details header block above results."""
+    speaker_val = st.session_state.get(speaker_key, "")
+    topic_val = st.session_state.get(topic_key, "")
+    scripture_val = st.session_state.get(scripture_key, "")
+    lang_val = st.session_state.get(lang_key, "English (default)")
+
+    if not any([speaker_val, topic_val, scripture_val]):
+        return
+
+    html = (
+        "<div style='background:#111; border:1px solid #2a2a2a;"
+        " border-top:3px solid #c9a96e; border-radius:12px;"
+        " padding:1.2rem 1.8rem; margin-bottom:1.2rem;'>"
+        "<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr));"
+        " gap:0.8rem;'>"
+    )
+    if speaker_val:
+        html += (
+            "<div>"
+            "<div style='font-size:0.72rem; color:#666; text-transform:uppercase;"
+            " letter-spacing:0.8px; margin-bottom:3px;'>🎙️ Speaker</div>"
+            f"<div style='font-family:Cormorant Garamond,serif; font-size:1.15rem;"
+            f" font-weight:700; color:#e8e0d4;'>{speaker_val}</div>"
+            "</div>"
+        )
+    if topic_val:
+        html += (
+            "<div>"
+            "<div style='font-size:0.72rem; color:#666; text-transform:uppercase;"
+            " letter-spacing:0.8px; margin-bottom:3px;'>📖 Topic</div>"
+            f"<div style='font-family:Cormorant Garamond,serif; font-size:1.15rem;"
+            f" font-weight:700; color:#e8e0d4;'>{topic_val}</div>"
+            "</div>"
+        )
+    if scripture_val:
+        html += (
+            "<div>"
+            "<div style='font-size:0.72rem; color:#666; text-transform:uppercase;"
+            " letter-spacing:0.8px; margin-bottom:3px;'>📚 Scripture</div>"
+            f"<div style='font-family:Cormorant Garamond,serif; font-size:1.15rem;"
+            f" font-weight:700; color:#c9a96e;'>{scripture_val}</div>"
+            "</div>"
+        )
+    if lang_val and lang_val != "English (default)":
+        html += (
+            "<div>"
+            "<div style='font-size:0.72rem; color:#666; text-transform:uppercase;"
+            " letter-spacing:0.8px; margin-bottom:3px;'>🌐 Language</div>"
+            f"<div style='font-family:Cormorant Garamond,serif; font-size:1.15rem;"
+            f" font-weight:700; color:#e8e0d4;'>{lang_val}</div>"
+            "</div>"
+        )
+    html += "</div></div>"
+    st.markdown(html, unsafe_allow_html=True)
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # MAIN TABS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -428,6 +485,8 @@ if "video_results" in st.session_state:
     st.markdown("---")
     st.markdown('<div class="step-label">Results</div>', unsafe_allow_html=True)
 
+    show_discourse_header("vid_speaker", "vid_topic", "vid_scripture", "vid_lang")
+
     if insights:
         show_insights(insights)
 
@@ -450,3 +509,4 @@ if "video_results" in st.session_state:
     if st.button("🔄 Clear results and start over", key="vid_clear"):
         del st.session_state["video_results"]
         st.rerun()
+
