@@ -326,6 +326,11 @@ if audio_ready_path and os.path.exists(audio_ready_path):
         output_language = st.selectbox(
             "Output language", list(LANGUAGES.keys()), key="vid_lang"
         )
+        # Clear old results if language changed
+        if st.session_state.get("_vid_lang_prev") != output_language:
+            st.session_state["_vid_lang_prev"] = output_language
+            if "video_results" in st.session_state:
+                del st.session_state["video_results"]
 
     selected_columns = []
     if summary_style == "Structured table":
@@ -445,4 +450,3 @@ if "video_results" in st.session_state:
     if st.button("🔄 Clear results and start over", key="vid_clear"):
         del st.session_state["video_results"]
         st.rerun()
-
