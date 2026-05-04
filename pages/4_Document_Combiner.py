@@ -191,6 +191,11 @@ if uploaded_files:
             output_language = st.selectbox(
                 "Output language", list(LANGUAGES.keys()), key="doc_lang"
             )
+            # Clear old results if language changed
+            if st.session_state.get("_doc_lang_prev") != output_language:
+                st.session_state["_doc_lang_prev"] = output_language
+                if "doc_results" in st.session_state:
+                    del st.session_state["doc_results"]
 
         selected_columns = []
         if summary_style == "Structured table":
@@ -306,5 +311,3 @@ if "doc_results" in st.session_state:
     if st.button("🔄 Clear results and start over", key="doc_clear"):
         del st.session_state["doc_results"]
         st.rerun()
-
-
