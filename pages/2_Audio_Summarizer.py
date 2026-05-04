@@ -215,6 +215,11 @@ if uploaded_files:
         output_language = st.selectbox(
             "Output language", list(LANGUAGES.keys()), key="audio_lang"
         )
+        # Clear old results if language changed
+        if st.session_state.get("_audio_lang_prev") != output_language:
+            st.session_state["_audio_lang_prev"] = output_language
+            if "audio_results" in st.session_state:
+                del st.session_state["audio_results"]
 
     selected_columns = []
     if summary_style == "Structured table":
@@ -338,5 +343,3 @@ if "audio_results" in st.session_state:
     if st.button("🔄 Clear results and start over", key="audio_clear"):
         del st.session_state["audio_results"]
         st.rerun()
-
-
