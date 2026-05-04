@@ -483,9 +483,30 @@ def _make_pdf_weasyprint(title: str, content: str) -> bytes:
 <head>
 <meta charset="UTF-8">
 <style>
+@font-face {{
+    font-family: 'NotoSerif';
+    src: url('/usr/share/fonts/truetype/noto/NotoSerifDevanagari-Regular.ttf');
+}}
+@font-face {{
+    font-family: 'NotoKannada';
+    src: url('/usr/share/fonts/truetype/noto/NotoSansKannada-Regular.ttf');
+}}
+@font-face {{
+    font-family: 'NotoTelugu';
+    src: url('/usr/share/fonts/truetype/noto/NotoSansTelugu-Regular.ttf');
+}}
+@font-face {{
+    font-family: 'NotoTamil';
+    src: url('/usr/share/fonts/truetype/noto/NotoSansTamil-Regular.ttf');
+}}
+@font-face {{
+    font-family: 'NotoGujarati';
+    src: url('/usr/share/fonts/truetype/noto/NotoSansGujarati-Regular.ttf');
+}}
 @page {{ {landscape} margin: 1.5cm; }}
 body {{
-    font-family: FreeSerif, FreeSans, DejaVu Sans, serif;
+    font-family: 'NotoSerif', 'NotoKannada', 'NotoTelugu', 'NotoTamil',
+                 'NotoGujarati', FreeSerif, FreeSans, serif;
     font-size: 10px;
     color: #111;
     line-height: 1.6;
@@ -755,7 +776,3 @@ TABLE_CSS = (
     "table td:last-child, table th:last-child { border-right: none; }"
     "</style>"
 )
-
-
-
-
