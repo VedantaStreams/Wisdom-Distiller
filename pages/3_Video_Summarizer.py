@@ -461,6 +461,11 @@ if audio_ready_path and os.path.exists(audio_ready_path):
 
             st.session_state.pop("video_audio_path", None)
             st.session_state["video_results"] = {
+                "speaker": st.session_state.get("vid_speaker", ""),
+                "topic": st.session_state.get("vid_topic", ""),
+                "scripture": st.session_state.get("vid_scripture", ""),
+                "language": st.session_state.get("vid_lang", "English (default)"),
+
                 "summary": summary,
                 "transcript": transcript,
                 "insights": insights,
@@ -485,7 +490,27 @@ if "video_results" in st.session_state:
     st.markdown("---")
     st.markdown('<div class="step-label">Results</div>', unsafe_allow_html=True)
 
-    show_discourse_header("vid_speaker", "vid_topic", "vid_scripture", "vid_lang")
+    # Show header from stored results
+    _sp = r.get("speaker", "")
+    _tp = r.get("topic", "")
+    _sc = r.get("scripture", "")
+    _lg = r.get("language", "English (default)")
+    if any([_sp, _tp, _sc]):
+        _h = ("<div style='background:#111; border:1px solid #2a2a2a;"
+              " border-top:3px solid #c9a96e; border-radius:12px;"
+              " padding:1.2rem 1.8rem; margin-bottom:1.2rem;'>"
+              "<div style='display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:0.8rem;'>"
+        )
+        if _sp: _h += (f"<div><div style='font-size:0.72rem;color:#666;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;'>🎙️ Speaker</div>"
+                       f"<div style='font-family:Cormorant Garamond,serif;font-size:1.15rem;font-weight:700;color:#e8e0d4;'>{_sp}</div></div>")
+        if _tp: _h += (f"<div><div style='font-size:0.72rem;color:#666;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;'>📖 Topic</div>"
+                       f"<div style='font-family:Cormorant Garamond,serif;font-size:1.15rem;font-weight:700;color:#e8e0d4;'>{_tp}</div></div>")
+        if _sc: _h += (f"<div><div style='font-size:0.72rem;color:#666;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;'>📚 Scripture</div>"
+                       f"<div style='font-family:Cormorant Garamond,serif;font-size:1.15rem;font-weight:700;color:#c9a96e;'>{_sc}</div></div>")
+        if _lg and _lg != "English (default)": _h += (f"<div><div style='font-size:0.72rem;color:#666;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px;'>🌐 Language</div>"
+                       f"<div style='font-family:Cormorant Garamond,serif;font-size:1.15rem;font-weight:700;color:#e8e0d4;'>{_lg}</div></div>")
+        _h += "</div></div>"
+        st.markdown(_h, unsafe_allow_html=True)
 
     if insights:
         show_insights(insights)
@@ -509,4 +534,3 @@ if "video_results" in st.session_state:
     if st.button("🔄 Clear results and start over", key="vid_clear"):
         del st.session_state["video_results"]
         st.rerun()
-
