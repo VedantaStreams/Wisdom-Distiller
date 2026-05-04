@@ -291,6 +291,11 @@ if uploaded_files:
 
             # Store in session state so downloads don't clear results
             st.session_state["audio_results"] = {
+                "speaker": st.session_state.get("audio_speaker", ""),
+                "topic": st.session_state.get("audio_topic", ""),
+                "scripture": st.session_state.get("audio_scripture", ""),
+                "language": st.session_state.get("audio_lang", "English (default)"),
+
                 "summary": summary,
                 "transcript": transcript,
                 "insights": insights,
@@ -315,10 +320,10 @@ if "audio_results" in st.session_state:
     st.markdown('<div class="step-label">Results</div>', unsafe_allow_html=True)
 
     # ── Discourse Header Block ─────────────────────────────────────────────────
-    speaker_val = st.session_state.get("audio_speaker", "")
-    topic_val = st.session_state.get("audio_topic", "")
-    scripture_val = st.session_state.get("audio_scripture", "")
-    lang_val = st.session_state.get("audio_lang", "English (default)")
+    speaker_val = r.get("speaker", "")
+    topic_val = r.get("topic", "")
+    scripture_val = r.get("scripture", "")
+    lang_val = r.get("language", "English (default)")
 
     if any([speaker_val, topic_val, scripture_val]):
         header_html = (
@@ -396,4 +401,3 @@ if "audio_results" in st.session_state:
     if st.button("🔄 Clear results and start over", key="audio_clear"):
         del st.session_state["audio_results"]
         st.rerun()
-
