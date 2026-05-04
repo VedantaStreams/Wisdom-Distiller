@@ -40,7 +40,10 @@ def _register_unicode_fonts():
     return "Helvetica", "Helvetica-Bold"
 
 # Register globally when module loads
-_BASE_FONT, _BOLD_FONT = _register_unicode_fonts()
+try:
+    _BASE_FONT, _BOLD_FONT = _register_unicode_fonts()
+except Exception:
+    _BASE_FONT, _BOLD_FONT = "Helvetica", "Helvetica-Bold"
 
 
 # ── Audio duration ─────────────────────────────────────────────────────────────
@@ -153,25 +156,51 @@ def prepare_audio_chunks(uploaded_files: list) -> list:
 # ── Transcription ──────────────────────────────────────────────────────────────
 
 def transcribe_chunks(chunks: list, openai_key: str,
-                      progress_bar=None, status_text=None) -> str:
-    """Transcribe audio chunks via OpenAI Whisper API."""
+                      progress_bar=None, status_text=None,
+                      speaker: str = "", scripture: str = "") -> str:
+    """Transcribe audio chunks via OpenAI Whisper API.
+    Uses prompt hints to improve Sanskrit and spiritual term recognition."""
     from openai import OpenAI
     client = OpenAI(api_key=openai_key)
     parts = []
 
+    # Build a prompt hint to help Whisper recognize spiritual/Sanskrit terms
+    base_prompt = (
+        "This is a Vedanta spiritual discourse. "
+        "Common terms include: Brahman, Atman, Maya, Upanishad, Bhagavad Gita, "
+        "Vedanta, Advaita, Guru, Shishya, Sanskrit, shloka, pranam, "
+        "Paravidya, Aparavidya, jnana, karma, dharma, moksha, samsara, "
+        "Chinmaya Mission, Swami, prana, manas, satyam, annam."
+    )
+    if speaker:
+        base_prompt += f" The speaker is {speaker}."
+    if scripture:
+        base_prompt += f" The scripture being discussed is {scripture}."
+
+    prev_text = ""
     for i, chunk_path in enumerate(chunks):
         if status_text:
-            status_text.markdown(f"**Transcribing** part {i+1} of {len(chunks)}...")
+            status_text.markdown(
+                f"**Transcribing** part {i+1} of {len(chunks)}..."
+            )
         if progress_bar:
             progress_bar.progress(0.05 + (i + 1) / len(chunks) * 0.60)
+
+        # Use last 200 chars of previous chunk as context for continuity
+        prompt = base_prompt
+        if prev_text:
+            prompt += " " + prev_text[-200:]
 
         with open(chunk_path, "rb") as audio_file:
             response = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=audio_file,
-                response_format="text"
+                response_format="text",
+                prompt=prompt
             )
-        parts.append(response.strip())
+        text = response.strip()
+        parts.append(text)
+        prev_text = text
 
         try:
             if any(x in chunk_path for x in ["chunk_", "yt_audio", "extracted"]):
@@ -419,6 +448,7 @@ def make_pdf(title: str, content: str) -> bytes:
     """Generate a PDF using weasyprint for full Unicode/Indian script support.
     Falls back to reportlab if weasyprint is unavailable."""
     try:
+        import weasyprint
         return _make_pdf_weasyprint(title, content)
     except Exception:
         return _make_pdf_reportlab(title, content)
@@ -478,31 +508,30 @@ def _make_pdf_weasyprint(title: str, content: str) -> bytes:
         main_content = paragraphs
         landscape = "size: A4 portrait;"
 
+    import os as _os
+    _noto_devanagari = '/usr/share/fonts/truetype/noto/NotoSerifDevanagari-Regular.ttf'
+    _noto_kannada = '/usr/share/fonts/truetype/noto/NotoSansKannada-Regular.ttf'
+    _noto_telugu = '/usr/share/fonts/truetype/noto/NotoSansTelugu-Regular.ttf'
+    _noto_tamil = '/usr/share/fonts/truetype/noto/NotoSansTamil-Regular.ttf'
+    _noto_gujarati = '/usr/share/fonts/truetype/noto/NotoSansGujarati-Regular.ttf'
+
+    _font_faces = ""
+    for _fname, _fpath in [
+        ("NotoSerif", _noto_devanagari),
+        ("NotoKannada", _noto_kannada),
+        ("NotoTelugu", _noto_telugu),
+        ("NotoTamil", _noto_tamil),
+        ("NotoGujarati", _noto_gujarati),
+    ]:
+        if _os.path.exists(_fpath):
+            _font_faces += f"@font-face {{ font-family: '{_fname}'; src: url('{_fpath}'); }}"
+
     html = f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <style>
-@font-face {{
-    font-family: 'NotoSerif';
-    src: url('/usr/share/fonts/truetype/noto/NotoSerifDevanagari-Regular.ttf');
-}}
-@font-face {{
-    font-family: 'NotoKannada';
-    src: url('/usr/share/fonts/truetype/noto/NotoSansKannada-Regular.ttf');
-}}
-@font-face {{
-    font-family: 'NotoTelugu';
-    src: url('/usr/share/fonts/truetype/noto/NotoSansTelugu-Regular.ttf');
-}}
-@font-face {{
-    font-family: 'NotoTamil';
-    src: url('/usr/share/fonts/truetype/noto/NotoSansTamil-Regular.ttf');
-}}
-@font-face {{
-    font-family: 'NotoGujarati';
-    src: url('/usr/share/fonts/truetype/noto/NotoSansGujarati-Regular.ttf');
-}}
+{_font_faces}
 @page {{ {landscape} margin: 1.5cm; }}
 body {{
     font-family: 'NotoSerif', 'NotoKannada', 'NotoTelugu', 'NotoTamil',
@@ -776,3 +805,4 @@ TABLE_CSS = (
     "table td:last-child, table th:last-child { border-right: none; }"
     "</style>"
 )
+
