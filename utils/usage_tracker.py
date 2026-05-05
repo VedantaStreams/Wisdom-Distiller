@@ -163,3 +163,4 @@ def show_usage_badge():
             f"🔢 {remaining} free use(s) remaining</div>",
             unsafe_allow_html=True
         )
+
