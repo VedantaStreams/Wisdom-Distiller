@@ -1,3 +1,35 @@
+def show_discourse_header(r):
+    sp = r.get("speaker", "") or "—"
+    tp = r.get("topic", "") or "—"
+    sc = r.get("scripture", "") or "—"
+    lg = r.get("language", "English (default)") or "English (default)"
+    st.markdown(f"""
+<div style="background:#111;border:1px solid #2a2a2a;border-top:4px solid #c9a96e;
+            border-radius:12px;padding:1.4rem 2rem;margin-bottom:1.5rem;">
+  <div style="font-size:0.7rem;color:#c9a96e;text-transform:uppercase;
+              letter-spacing:1px;font-weight:600;margin-bottom:1rem;">
+    ✦ Discourse Details
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;">
+    <div>
+      <div style="font-size:0.7rem;color:#666;margin-bottom:4px;">🎙️ SPEAKER</div>
+      <div style="font-size:1.1rem;font-weight:700;color:#e8e0d4;">{sp}</div>
+    </div>
+    <div>
+      <div style="font-size:0.7rem;color:#666;margin-bottom:4px;">📖 TOPIC</div>
+      <div style="font-size:1.1rem;font-weight:700;color:#e8e0d4;">{tp}</div>
+    </div>
+    <div>
+      <div style="font-size:0.7rem;color:#666;margin-bottom:4px;">📚 SCRIPTURE</div>
+      <div style="font-size:1.1rem;font-weight:700;color:#c9a96e;">{sc}</div>
+    </div>
+    <div>
+      <div style="font-size:0.7rem;color:#666;margin-bottom:4px;">🌐 LANGUAGE</div>
+      <div style="font-size:1.1rem;font-weight:700;color:#e8e0d4;">{lg}</div>
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 import streamlit as st
 import sys
 from pathlib import Path
@@ -166,4 +198,3 @@ if uploaded_txts:
 
         except Exception as e:
             st.error(f"❌ Error: {e}")
-
