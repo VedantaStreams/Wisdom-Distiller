@@ -51,12 +51,12 @@ om_path = Path(__file__).parent / "Om.jpeg"
 om_tag = (f'<img class="om" src="{img_b64(str(om_path))}" alt="Om"/>'
           if om_path.exists() else '<div style="font-size:2.5rem">🕉️</div>')
 
-# iPhone home screen icon — must be after img_b64 is defined
-if om_path.exists():
-    st.markdown(
-        '<link rel="apple-touch-icon" href="' + img_b64(str(om_path)) + '">',
-        unsafe_allow_html=True
-    )
+# iPhone home screen icon — served as static file
+st.markdown(
+    '<link rel="apple-touch-icon" href="./app/static/apple-touch-icon.png">'
+    '<link rel="apple-touch-icon-precomposed" href="./app/static/apple-touch-icon.png">',
+    unsafe_allow_html=True
+)
 
 headshot_path = Path(__file__).parent / "headshot.jpeg"
 if headshot_path.exists():
@@ -352,3 +352,4 @@ st.markdown(
     "</div></div>",
     unsafe_allow_html=True
 )
+
