@@ -8,7 +8,7 @@ ROOT = Path(__file__).parent.parent.resolve()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from utils.styles import SHARED_CSS, LIGHT_CSS
+from utils.styles import SHARED_CSS
 from utils.helpers import (
     extract_audio_from_video,
     clean_youtube_url,
@@ -421,3 +421,4 @@ if audio_ready_path and os.path.exists(audio_ready_path):
 
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
+
