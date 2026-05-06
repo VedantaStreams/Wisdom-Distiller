@@ -10,6 +10,7 @@ if str(ROOT) not in sys.path:
 
 from utils.styles import SHARED_CSS
 from utils.helpers import (
+
     extract_audio_from_video,
     clean_youtube_url,
     split_audio_ffmpeg,
@@ -23,6 +24,13 @@ from utils.helpers import (
     TABLE_CSS,
     LANGUAGES
 )
+
+st.markdown(SHARED_CSS, unsafe_allow_html=True)
+
+# ── Home button in sidebar ────────────────────────────────────────────────────
+with st.sidebar:
+    st.page_link("app.py", label="🏠 Home")
+    st.markdown("<hr style='border-color:#1e1e1e; margin:0.3rem 0 0.8rem;'/>", unsafe_allow_html=True)
 
 def show_discourse_header(r):
     sp  = r.get("speaker", "") or "—"
