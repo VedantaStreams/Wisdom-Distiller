@@ -87,16 +87,6 @@ for _gd_name in ["gurudev.jpeg", "gurudev.jpg", "Gurudev.jpg", "Gurudev.jpeg"]:
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
-    # ── Theme toggle ────────────────────────────────────────────────────────────
-    if "theme" not in st.session_state:
-        st.session_state["theme"] = "dark"
-    _is_dark = st.session_state.get("theme", "dark") == "dark"
-    _lbl = "☀️ Switch to Light Mode" if _is_dark else "🌙 Switch to Dark Mode"
-    if st.button(_lbl, key="theme_toggle", use_container_width=True):
-        st.session_state["theme"] = "light" if _is_dark else "dark"
-        st.rerun()
-    st.markdown("<hr style='border-color:#2a2a2a;margin:0.5rem 0;'/>",
-                unsafe_allow_html=True)
 
     st.markdown(
         f'<div style="text-align:center; padding:0.8rem 0 0.4rem;">'
@@ -346,7 +336,7 @@ st.markdown("<hr style='border-color:#1e1e1e; margin:2rem 0 1.5rem;'/>",
 st.markdown(
     "<div style='text-align:center; padding:1rem 1rem 2rem;'>"
     + gurudev_img
-    + "<div style='font-size:0.72rem; color:#777; margin-top:8px; font-style:italic;'>"
+    + "<div style='font-size:0.72rem; color:#7a5c44; margin-top:8px; font-style:italic;'>"
     "P\u016bjya Sw\u0101m\u012b Chinmay\u0101nanda</div>"
     "<div style='font-family:Cormorant Garamond,serif; font-style:italic;"
     " font-size:1.1rem; color:#c9a96e; line-height:1.9; margin:1rem auto 0;"
@@ -363,3 +353,4 @@ st.markdown(
     "</div></div>",
     unsafe_allow_html=True
 )
+
