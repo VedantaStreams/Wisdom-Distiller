@@ -68,16 +68,16 @@ def show_discourse_header(r):
     c1, c2, c3, c4 = st.columns(4)
     with c1:
         st.markdown("**🎙️ Speaker**")
-        st.markdown(f"**{sp}**")
+        st.markdown(f"<span style='font-size:0.78rem; font-weight:600;'>{sp}</span>", unsafe_allow_html=True)
     with c2:
         st.markdown("**📖 Topic**")
-        st.markdown(f"**{tp}**")
+        st.markdown(f"<span style='font-size:0.78rem; font-weight:600;'>{tp}</span>", unsafe_allow_html=True)
     with c3:
         st.markdown("**📚 Scripture**")
-        st.markdown(f"**{sc}**")
+        st.markdown(f"<span style='font-size:0.78rem; font-weight:600; color:#c9a96e;'>{sc}</span>", unsafe_allow_html=True)
     with c4:
         st.markdown("**🌐 Language**")
-        st.markdown(f"**{lg}**")
+        st.markdown(f"<span style='font-size:0.78rem; font-weight:600;'>{lg}</span>", unsafe_allow_html=True)
 
     # Second row — verses and key terms
     if verses or terms:
@@ -383,4 +383,3 @@ if "audio_results" in st.session_state:
     if st.button("🔄 Clear results and start over", key="audio_clear"):
         del st.session_state["audio_results"]
         st.rerun()
-
