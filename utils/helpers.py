@@ -553,7 +553,7 @@ def _make_pdf_weasyprint(title: str, content: str,
                 f"<div style='flex:1;padding:0.6rem 1rem;'>"
                 f"<div style='font-size:7pt;color:#888;text-transform:uppercase;"
                 f"letter-spacing:0.8px;margin-bottom:3px;'>{label}</div>"
-                f"<div style='font-size:11pt;font-weight:700;color:{color};'>"
+                f"<div style='font-size:8pt;font-weight:700;color:{color};'>"
                 f"{value or chr(8212)}</div></div>"
             )
         verse_str = " · ".join(verses) if verses else "—"
@@ -614,10 +614,10 @@ thead tr {{
     color: white;
 }}
 th {{
-    padding: 7px 8px;
+    padding: 5px 8px;
     text-align: left;
     font-weight: 600;
-    font-size: 9px;
+    font-size: 7px;
     border: 1px solid #b8935a;
 }}
 td {{
@@ -899,8 +899,8 @@ def markdown_table_to_html(md: str) -> str:
 
 TABLE_CSS = (
     "<style>"
-    "table th { padding: 10px 14px; text-align: left; color: #c9a96e;"
-    " font-weight: 500; font-size: 0.82rem; letter-spacing: 0.4px;"
+    "table th { padding: 8px 14px; text-align: left; color: #c9a96e;"
+    " font-weight: 500; font-size: 0.72rem; letter-spacing: 0.4px;"
     " text-transform: uppercase; border-right: 1px solid #2a2a2a; }"
     "table td { padding: 9px 14px; border-right: 1px solid #1e1e1e;"
     " border-bottom: 1px solid #1e1e1e; vertical-align: top; line-height: 1.6; }"
@@ -908,3 +908,4 @@ TABLE_CSS = (
     "table td:last-child, table th:last-child { border-right: none; }"
     "</style>"
 )
+
