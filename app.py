@@ -88,6 +88,10 @@ for _gd_name in ["gurudev.jpeg", "gurudev.jpg", "Gurudev.jpg", "Gurudev.jpeg"]:
 # ── Sidebar ────────────────────────────────────────────────────────────────────
 with st.sidebar:
 
+    # ── Home button ────────────────────────────────────────────────────────────
+    st.page_link("app.py", label="🏠 Home", icon=None)
+    st.markdown("<hr style='border-color:#1e1e1e; margin:0.3rem 0 0.8rem;'/>", unsafe_allow_html=True)
+
     st.markdown(
         f'<div style="text-align:center; padding:0.8rem 0 0.4rem;">'
         f'{avatar_tag}'
@@ -174,8 +178,10 @@ st.markdown(
     "<b style='color:#b8a88a;'>English (default)</b>, "
     "<b style='color:#b8a88a;'>Hindi</b>, "
     "<b style='color:#b8a88a;'>Kannada</b>, "
-    "<b style='color:#b8a88a;'>Telugu</b>, and "
-    "<b style='color:#b8a88a;'>Tamil</b>."
+    "<b style='color:#b8a88a;'>Telugu</b>, "
+    "<b style='color:#b8a88a;'>Tamil</b>, "
+    "<b style='color:#b8a88a;'>Marathi</b>, and "
+    "<b style='color:#b8a88a;'>Gujarati</b>."
     "</div>"
     "<div style='display:flex; gap:1.2rem; flex-wrap:wrap;"
     " align-items:center; justify-content:center;'>"
@@ -186,7 +192,7 @@ st.markdown(
     "<span style='color:#c9a96e;'>\u2756</span>"
     "<span style='font-size:0.82rem; color:#999;'>Export as PDF or Word</span>"
     "<span style='color:#c9a96e;'>\u2756</span>"
-    "<span style='font-size:0.82rem; color:#999;'>5 Language Outputs</span>"
+    "<span style='font-size:0.82rem; color:#999;'>7 Language Outputs</span>"
     "</div></div>",
     unsafe_allow_html=True
 )
@@ -200,7 +206,7 @@ st.markdown(
     "get back a clean transcript, structured summary, or a beautifully formatted table "
     "of key insights, with Sanskrit terms transliterated into English. "
     "Output available in <b>English</b>, <b>Hindi</b>, <b>Kannada</b>, "
-    "<b>Telugu</b>, and <b>Tamil</b>. Click any tool below to get started."
+    "<b>Telugu</b>, <b>Tamil</b>, <b>Marathi</b>, and <b>Gujarati</b>. Click any tool below to get started."
     "</div>",
     unsafe_allow_html=True
 )
