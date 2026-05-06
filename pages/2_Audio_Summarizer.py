@@ -21,6 +21,12 @@ st.set_page_config(
 )
 st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
+# ── Home button in sidebar ────────────────────────────────────────────────────
+with st.sidebar:
+    st.page_link("app.py", label="🏠 Home")
+    st.markdown("<hr style='border-color:#1e1e1e; margin:0.3rem 0 0.8rem;'/>", unsafe_allow_html=True)
+
+
 anthropic_key = st.session_state.get("anthropic_key", "")
 openai_key = st.session_state.get("openai_key", "")
 if not anthropic_key:
