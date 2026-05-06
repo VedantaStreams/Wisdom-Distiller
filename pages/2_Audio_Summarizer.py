@@ -6,7 +6,7 @@ ROOT = Path(__file__).parent.parent.resolve()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from utils.styles import SHARED_CSS, LIGHT_CSS
+from utils.styles import SHARED_CSS
 from utils.usage_tracker import check_usage_limit, increment_usage, show_usage_badge
 from utils.helpers import (
     prepare_audio_chunks, transcribe_chunks,
@@ -19,8 +19,7 @@ st.set_page_config(
     page_title="Audio Summarizer · Wisdom Distiller",
     page_icon="🎙️", layout="centered"
 )
-_theme_css = SHARED_CSS if st.session_state.get("theme","dark") == "dark" else LIGHT_CSS
-st.markdown(_theme_css, unsafe_allow_html=True)
+st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
 anthropic_key = st.session_state.get("anthropic_key", "")
 openai_key = st.session_state.get("openai_key", "")
@@ -384,3 +383,4 @@ if "audio_results" in st.session_state:
     if st.button("🔄 Clear results and start over", key="audio_clear"):
         del st.session_state["audio_results"]
         st.rerun()
+
