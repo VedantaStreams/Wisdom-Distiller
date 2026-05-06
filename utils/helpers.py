@@ -446,21 +446,27 @@ def _parse_markdown_table(content: str):
 
 def make_pdf(title: str, content: str,
              speaker: str = "", topic: str = "",
-             scripture: str = "", language: str = "") -> bytes:
+             scripture: str = "", language: str = "",
+             verses: list = None, key_terms: list = None) -> bytes:
     """Generate a PDF. Includes discourse header if details provided."""
+    verses = verses or []
+    key_terms = key_terms or []
     try:
         import weasyprint  # noqa
         return _make_pdf_weasyprint(title, content,
                                     speaker=speaker, topic=topic,
-                                    scripture=scripture, language=language)
+                                    scripture=scripture, language=language,
+                                    verses=verses, key_terms=key_terms)
     except ImportError:
         return _make_pdf_reportlab(title, content,
                                    speaker=speaker, topic=topic,
-                                   scripture=scripture, language=language)
+                                   scripture=scripture, language=language,
+                                   verses=verses, key_terms=key_terms)
     except Exception:
         return _make_pdf_reportlab(title, content,
                                    speaker=speaker, topic=topic,
-                                   scripture=scripture, language=language)
+                                   scripture=scripture, language=language,
+                                   verses=verses, key_terms=key_terms)
 
 
 def _weasyprint_write_pdf(html_string):
@@ -482,9 +488,12 @@ def _weasyprint_write_pdf(html_string):
 
 def _make_pdf_weasyprint(title: str, content: str,
                          speaker: str = "", topic: str = "",
-                         scripture: str = "", language: str = "") -> bytes:
+                         scripture: str = "", language: str = "",
+                         verses: list = None, key_terms: list = None) -> bytes:
     """PDF via weasyprint — supports all Indian scripts natively."""
     from weasyprint import HTML
+    verses = verses or []
+    key_terms = key_terms or []
 
     parsed = _parse_markdown_table(content)
     is_table = parsed is not None
@@ -538,7 +547,7 @@ def _make_pdf_weasyprint(title: str, content: str,
 
     # Build discourse header block for PDF
     header_html = ""
-    if any([speaker, topic, scripture]):
+    if any([speaker, topic, scripture, verses, key_terms]):
         def _cell(label, value, color="#1a1a1a"):
             return (
                 f"<div style='flex:1;padding:0.6rem 1rem;'>"
@@ -547,6 +556,8 @@ def _make_pdf_weasyprint(title: str, content: str,
                 f"<div style='font-size:11pt;font-weight:700;color:{color};'>"
                 f"{value or chr(8212)}</div></div>"
             )
+        verse_str = " · ".join(verses) if verses else "—"
+        terms_str = " · ".join(key_terms) if key_terms else "—"
         header_html = (
             "<div style='border-top:4px solid #c9a96e;border-radius:8px;"
             "background:#f9f6f0;margin-bottom:16px;'>"
@@ -558,6 +569,19 @@ def _make_pdf_weasyprint(title: str, content: str,
             + _cell("📖 Topic", topic)
             + _cell("📚 Scripture", scripture, "#8B6914")
             + _cell("🌐 Language", language or "English (default)")
+            + "</div>"
+            + (
+                "<div style='border-top:1px solid #e8ddd0;padding:6px 16px;'>"
+                f"<span style='font-size:7pt;color:#888;text-transform:uppercase;"
+                f"letter-spacing:0.8px;'>📜 Verses Referenced</span>&nbsp;"
+                f"<span style='font-size:9pt;color:#8B6914;'>{verse_str}</span>"
+                f"<br/>"
+                f"<span style='font-size:7pt;color:#888;text-transform:uppercase;"
+                f"letter-spacing:0.8px;'>🔑 Key Terms</span>&nbsp;"
+                f"<span style='font-size:9pt;color:#555;font-style:italic;'>{terms_str}</span>"
+                "</div>"
+                if (verses or key_terms) else ""
+            )
             + "</div></div>"
         )
 
@@ -617,8 +641,11 @@ tr {{ page-break-inside: avoid; }}
 
 def _make_pdf_reportlab(title: str, content: str,
                         speaker: str = "", topic: str = "",
-                        scripture: str = "", language: str = "") -> bytes:
+                        scripture: str = "", language: str = "",
+                        verses: list = None, key_terms: list = None) -> bytes:
     """Fallback PDF via reportlab with FreeSerif font."""
+    verses = verses or []
+    key_terms = key_terms or []
     from reportlab.lib.pagesizes import A4, landscape
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.units import cm
@@ -651,16 +678,18 @@ def _make_pdf_reportlab(title: str, content: str,
     story = [Paragraph(title, title_style), Spacer(1, 0.4*cm)]
 
     # Add discourse header if details provided
-    if any([speaker, topic, scripture]):
+    if any([speaker, topic, scripture, verses, key_terms]):
         from reportlab.platypus import Table, TableStyle
         from reportlab.lib import colors as rl_colors
+        verse_str = " · ".join(verses) if verses else "—"
+        terms_str = " · ".join(key_terms) if key_terms else "—"
+        page_w = (landscape(A4)[0] if is_table else A4[0]) - 3*cm
         hdr_data = [[
             Paragraph(f"<b>🎙️ Speaker</b><br/>{speaker or '—'}", body_style),
             Paragraph(f"<b>📖 Topic</b><br/>{topic or '—'}", body_style),
             Paragraph(f"<b>📚 Scripture</b><br/>{scripture or '—'}", body_style),
             Paragraph(f"<b>🌐 Language</b><br/>{language or 'English'}", body_style),
         ]]
-        page_w = (landscape(A4)[0] if is_table else A4[0]) - 3*cm
         htbl = Table(hdr_data, colWidths=[page_w/4]*4)
         htbl.setStyle(TableStyle([
             ("BACKGROUND", (0,0), (-1,-1), rl_colors.HexColor("#f9f6f0")),
@@ -671,6 +700,19 @@ def _make_pdf_reportlab(title: str, content: str,
             ("LEFTPADDING",   (0,0), (-1,-1), 10),
         ]))
         story.append(htbl)
+        if verses or key_terms:
+            vtbl = Table([[
+                Paragraph(f"<b>📜 Verses Referenced:</b> {verse_str}", body_style),
+                Paragraph(f"<b>🔑 Key Terms:</b> <i>{terms_str}</i>", body_style),
+            ]], colWidths=[page_w/2, page_w/2])
+            vtbl.setStyle(TableStyle([
+                ("BACKGROUND", (0,0), (-1,-1), rl_colors.HexColor("#f9f6f0")),
+                ("GRID",       (0,0), (-1,-1), 0.5, rl_colors.HexColor("#e8ddd0")),
+                ("TOPPADDING",    (0,0), (-1,-1), 6),
+                ("BOTTOMPADDING", (0,0), (-1,-1), 6),
+                ("LEFTPADDING",   (0,0), (-1,-1), 10),
+            ]))
+            story.append(vtbl)
         story.append(Spacer(1, 0.4*cm))
     if is_table:
         headers, rows = parsed
@@ -866,3 +908,4 @@ TABLE_CSS = (
     "table td:last-child, table th:last-child { border-right: none; }"
     "</style>"
 )
+
