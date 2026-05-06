@@ -54,13 +54,13 @@ def show_discourse_header(r):
         f"letter-spacing:1px;font-weight:600;margin-bottom:1rem;'>✦ Discourse Details</div>"
         f"<div style='display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;padding-bottom:1rem;'>"
         f"<div><div style='font-size:0.7rem;color:#666;margin-bottom:4px;'>🎙️ SPEAKER</div>"
-        f"<div style='font-size:1.1rem;font-weight:700;color:#e8e0d4;'>{sp}</div></div>"
+        f"<div style='font-size:0.78rem;font-weight:700;color:#e8e0d4;'>{sp}</div></div>"
         f"<div><div style='font-size:0.7rem;color:#666;margin-bottom:4px;'>📖 TOPIC</div>"
-        f"<div style='font-size:1.1rem;font-weight:700;color:#e8e0d4;'>{tp}</div></div>"
+        f"<div style='font-size:0.78rem;font-weight:700;color:#e8e0d4;'>{tp}</div></div>"
         f"<div><div style='font-size:0.7rem;color:#666;margin-bottom:4px;'>📚 SCRIPTURE</div>"
-        f"<div style='font-size:1.1rem;font-weight:700;color:#c9a96e;'>{sc}</div></div>"
+        f"<div style='font-size:0.78rem;font-weight:700;color:#c9a96e;'>{sc}</div></div>"
         f"<div><div style='font-size:0.7rem;color:#666;margin-bottom:4px;'>🌐 LANGUAGE</div>"
-        f"<div style='font-size:1.1rem;font-weight:700;color:#e8e0d4;'>{lg}</div></div>"
+        f"<div style='font-size:0.78rem;font-weight:700;color:#e8e0d4;'>{lg}</div></div>"
         f"</div>"
         f"{verses_row}"
         f"</div>",
@@ -421,4 +421,3 @@ if audio_ready_path and os.path.exists(audio_ready_path):
 
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
-
