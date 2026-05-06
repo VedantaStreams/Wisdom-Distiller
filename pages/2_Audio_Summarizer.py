@@ -48,10 +48,19 @@ st.markdown("""
 
 # ── Discourse header ───────────────────────────────────────────────────────────
 def show_discourse_header(r):
-    sp = r.get("speaker", "") or "—"
-    tp = r.get("topic", "") or "—"
-    sc = r.get("scripture", "") or "—"
-    lg = r.get("language", "English (default)") or "English (default)"
+    sp  = r.get("speaker", "") or "—"
+    tp  = r.get("topic", "") or "—"
+    sc  = r.get("scripture", "") or "—"
+    lg  = r.get("language", "English (default)") or "English (default)"
+
+    # Pull verses and key terms from insights
+    insights = r.get("insights", {})
+    verses   = insights.get("scriptures", [])
+    terms    = insights.get("key_terms", [])
+    verse_str = " · ".join(verses) if verses else "—"
+    terms_str = " · ".join(terms)  if terms  else "—"
+
+    # Top row — 4 columns
     st.markdown(
         "<div style='border-top:4px solid #c9a96e; margin-bottom:0.5rem;'></div>",
         unsafe_allow_html=True
@@ -69,6 +78,22 @@ def show_discourse_header(r):
     with c4:
         st.markdown("**🌐 Language**")
         st.markdown(f"### {lg}")
+
+    # Second row — verses and key terms
+    if verses or terms:
+        st.markdown(
+            f"<div style='background:#111; border:1px solid #2a2a2a; border-radius:8px;"
+            f" padding:0.7rem 1.2rem; margin-top:0.3rem; margin-bottom:0.5rem;'>"
+            f"<span style='font-size:0.72rem; color:#666; text-transform:uppercase;"
+            f" letter-spacing:0.8px;'>📜 Verses Referenced</span>&nbsp;&nbsp;"
+            f"<span style='font-size:0.85rem; color:#c9a96e;'>{verse_str}</span>"
+            f"<br/>"
+            f"<span style='font-size:0.72rem; color:#666; text-transform:uppercase;"
+            f" letter-spacing:0.8px;'>🔑 Key Terms</span>&nbsp;&nbsp;"
+            f"<span style='font-size:0.85rem; color:#b8a88a; font-style:italic;'>{terms_str}</span>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
     st.markdown("---")
 
 
@@ -100,6 +125,9 @@ def show_downloads(title, summary, transcript, r=None):
     _tp = r.get("topic","") if r else ""
     _sc = r.get("scripture","") if r else ""
     _lg = r.get("language","English (default)") if r else ""
+    _insights = r.get("insights", {}) if r else {}
+    _verses = _insights.get("scriptures", [])
+    _terms  = _insights.get("key_terms", [])
     st.markdown("#### ⬇️ Downloads")
     st.markdown(
         "<div style='background:#111; border:1px solid #2a2a2a; border-radius:10px;"
@@ -113,7 +141,7 @@ def show_downloads(title, summary, transcript, r=None):
                            file_name="summary.txt", mime="text/plain",
                            key="dl_sum_txt")
     with c2:
-        st.download_button("⬇️ PDF", data=make_pdf(title, summary, speaker=_sp, topic=_tp, scripture=_sc, language=_lg),
+        st.download_button("⬇️ PDF", data=make_pdf(title, summary, speaker=_sp, topic=_tp, scripture=_sc, language=_lg, verses=_verses, key_terms=_terms),
                            file_name="summary.pdf", mime="application/pdf",
                            key="dl_sum_pdf")
     with c3:
@@ -134,7 +162,7 @@ def show_downloads(title, summary, transcript, r=None):
                            file_name="transcript.txt", mime="text/plain",
                            key="dl_tr_txt")
     with t2:
-        st.download_button("⬇️ PDF", data=make_pdf(title + " — Transcript", transcript, speaker=_sp, topic=_tp, scripture=_sc, language=_lg),
+        st.download_button("⬇️ PDF", data=make_pdf(title + " — Transcript", transcript, speaker=_sp, topic=_tp, scripture=_sc, language=_lg, verses=_verses, key_terms=_terms),
                            file_name="transcript.pdf", mime="application/pdf",
                            key="dl_tr_pdf")
     with t3:
@@ -262,6 +290,13 @@ if uploaded_files:
                     scripture_hint=scripture_hint
                 )
                 progress_bar.progress(0.78)
+                # Auto-fill missing fields from insights
+                if not speaker_hint and insights.get("speaker", "Unknown") != "Unknown":
+                    speaker_hint = insights.get("speaker", "")
+                if not topic_hint and insights.get("topic", "Could not determine") != "Could not determine":
+                    topic_hint = insights.get("topic", "")
+                if not scripture_hint and insights.get("scripture_text", ""):
+                    scripture_hint = insights.get("scripture_text", "")
 
             status_text.markdown("**Summarizing with Claude…**")
             summary = summarize_text(
