@@ -15,6 +15,12 @@ st.set_page_config(
 )
 st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
+# ── Home button in sidebar ────────────────────────────────────────────────────
+with st.sidebar:
+    st.page_link("app.py", label="🏠 Home")
+    st.markdown("<hr style='border-color:#1e1e1e; margin:0.3rem 0 0.8rem;'/>", unsafe_allow_html=True)
+
+
 
 # ── Load Om image ──────────────────────────────────────────────────────────────
 def img_b64(path: str, mime: str = "image/jpeg") -> str:
@@ -125,4 +131,3 @@ st.markdown("""
     <div style="font-size:1.3rem; letter-spacing:8px;">🪷 🕉️ 🪷</div>
 </div>
 """, unsafe_allow_html=True)
-
