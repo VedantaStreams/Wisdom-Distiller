@@ -514,16 +514,39 @@ def _make_pdf_weasyprint(title: str, content: str,
         )
         landscape = "size: A4 landscape;"
     else:
+        import re as _re
+        def _md_inline(t):
+            t = _re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', t)
+            t = _re.sub(r'__(.+?)__', r'<strong>\1</strong>', t)
+            t = _re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<em>\1</em>', t)
+            return t
         paragraphs = ""
+        in_list = False
         for line in content.split("\n"):
-            if line.startswith("## "):
-                paragraphs += f"<h2>{line[3:]}</h2>"
-            elif line.startswith("# "):
-                paragraphs += f"<h1>{line[2:]}</h1>"
-            elif line.startswith("- ") or line.startswith("* "):
-                paragraphs += f"<li>{line[2:]}</li>"
-            elif line.strip():
-                paragraphs += f"<p>{line}</p>"
+            s = line.strip()
+            if s.startswith("### "):
+                if in_list: paragraphs += "</ul>"; in_list = False
+                paragraphs += f"<h3>{_md_inline(s[4:])}</h3>"
+            elif s.startswith("## "):
+                if in_list: paragraphs += "</ul>"; in_list = False
+                paragraphs += f"<h2>{_md_inline(s[3:])}</h2>"
+            elif s.startswith("# "):
+                if in_list: paragraphs += "</ul>"; in_list = False
+                paragraphs += f"<h1>{_md_inline(s[2:])}</h1>"
+            elif s.startswith("> "):
+                if in_list: paragraphs += "</ul>"; in_list = False
+                paragraphs += f"<blockquote>{_md_inline(s[2:])}</blockquote>"
+            elif s.startswith("- ") or s.startswith("* ") or s.startswith("• "):
+                if not in_list: paragraphs += "<ul>"; in_list = True
+                item = s[2:] if s[0] in "-*•" else s[2:]
+                paragraphs += f"<li>{_md_inline(item)}</li>"
+            elif s == "":
+                if in_list: paragraphs += "</ul>"; in_list = False
+            else:
+                if in_list: paragraphs += "</ul>"; in_list = False
+                paragraphs += f"<p>{_md_inline(s)}</p>"
+        if in_list:
+            paragraphs += "</ul>"
         main_content = paragraphs
         landscape = "size: A4 portrait;"
 
@@ -738,12 +761,37 @@ def _make_pdf_reportlab(title: str, content: str,
         ]))
         story.append(tbl)
     else:
+        import re as _re2
+        def _rl_inline(t):
+            # escape XML special chars first
+            t = t.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
+            # bold
+            t = _re2.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', t)
+            t = _re2.sub(r'__(.+?)__', r'<b>\1</b>', t)
+            # italic
+            t = _re2.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<i>\1</i>', t)
+            return t
+        in_list = False
         for line in content.split("\n"):
-            if line.strip():
-                safe = (line.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;"))
-                story.append(Paragraph(safe, body_style))
-            else:
+            s = line.strip()
+            if s.startswith("### "):
+                story.append(Spacer(1, 0.15*cm))
+                story.append(Paragraph(_rl_inline(s[4:]), header_style))
+            elif s.startswith("## "):
                 story.append(Spacer(1, 0.2*cm))
+                story.append(Paragraph(_rl_inline(s[3:]), header_style))
+            elif s.startswith("# "):
+                story.append(Spacer(1, 0.2*cm))
+                story.append(Paragraph(_rl_inline(s[2:]), header_style))
+            elif s.startswith("> "):
+                story.append(Paragraph(_rl_inline(s[2:]), body_style))
+            elif s.startswith("- ") or s.startswith("* ") or s.startswith("• "):
+                item = s[2:] if s[0] in "-*•" else s[2:]
+                story.append(Paragraph("• " + _rl_inline(item), body_style))
+            elif s == "":
+                story.append(Spacer(1, 0.15*cm))
+            else:
+                story.append(Paragraph(_rl_inline(s), body_style))
     doc.build(story)
     return buffer.getvalue()
 
@@ -831,16 +879,45 @@ def make_docx(title: str, content: str) -> bytes:
                 cell.width = Cm(5)
 
     else:
+        import re as _re3
+        def _clean(t):
+            # strip ** and * markers, return plain text for docx
+            t = _re3.sub(r'\*\*(.+?)\*\*', r'\1', t)
+            t = _re3.sub(r'__(.+?)__', r'\1', t)
+            t = _re3.sub(r'\*(.+?)\*', r'\1', t)
+            return t
+        def _add_bold_run(para, t):
+            # split on **...** and add bold/normal runs
+            parts = _re3.split(r'(\*\*[^*]+\*\*)', t)
+            for part in parts:
+                if part.startswith('**') and part.endswith('**'):
+                    run = para.add_run(part[2:-2])
+                    run.bold = True
+                    run.font.name = "Arial Unicode MS"
+                else:
+                    run = para.add_run(_re3.sub(r'\*(.+?)\*', r'\1', part))
+                    run.font.name = "Arial Unicode MS"
         for line in content.split("\n"):
-            if line.startswith("## "):
-                doc.add_heading(line[3:], level=2)
-            elif line.startswith("# "):
-                doc.add_heading(line[2:], level=1)
-            elif line.startswith("- ") or line.startswith("* "):
+            s = line.strip()
+            if s.startswith("### "):
+                h = doc.add_heading(_clean(s[4:]), level=3)
+                h.runs[0].font.name = "Arial Unicode MS"
+            elif s.startswith("## "):
+                h = doc.add_heading(_clean(s[3:]), level=2)
+                h.runs[0].font.name = "Arial Unicode MS"
+            elif s.startswith("# "):
+                h = doc.add_heading(_clean(s[2:]), level=1)
+                h.runs[0].font.name = "Arial Unicode MS"
+            elif s.startswith("> "):
+                p = doc.add_paragraph()
+                _add_bold_run(p, s[2:])
+            elif s.startswith("- ") or s.startswith("* ") or s.startswith("• "):
+                item = s[2:] if s[0] in "-*•" else s[2:]
                 p = doc.add_paragraph(style="List Bullet")
-                p.add_run(line[2:])
-            elif line.strip():
-                doc.add_paragraph(line)
+                _add_bold_run(p, item)
+            elif s:
+                p = doc.add_paragraph()
+                _add_bold_run(p, s)
 
     buf = io.BytesIO()
     doc.save(buf)
@@ -908,4 +985,3 @@ TABLE_CSS = (
     "table td:last-child, table th:last-child { border-right: none; }"
     "</style>"
 )
-
