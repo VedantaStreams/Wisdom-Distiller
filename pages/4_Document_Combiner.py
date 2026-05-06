@@ -1,70 +1,45 @@
-
-
 def show_discourse_header(r):
-    sp = r.get("speaker", "") or "—"
-    tp = r.get("topic", "") or "—"
-    sc = r.get("scripture", "") or "—"
-    lg = r.get("language", "English (default)") or "English (default)"
-    st.markdown(f"""
-<div style="background:#111;border:1px solid #2a2a2a;border-top:4px solid #c9a96e;
-            border-radius:12px;padding:1.4rem 2rem;margin-bottom:1.5rem;">
-  <div style="font-size:0.7rem;color:#c9a96e;text-transform:uppercase;
-              letter-spacing:1px;font-weight:600;margin-bottom:1rem;">
-    ✦ Discourse Details
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;">
-    <div>
-      <div style="font-size:0.7rem;color:#666;margin-bottom:4px;">🎙️ SPEAKER</div>
-      <div style="font-size:1.1rem;font-weight:700;color:#e8e0d4;">{sp}</div>
-    </div>
-    <div>
-      <div style="font-size:0.7rem;color:#666;margin-bottom:4px;">📖 TOPIC</div>
-      <div style="font-size:1.1rem;font-weight:700;color:#e8e0d4;">{tp}</div>
-    </div>
-    <div>
-      <div style="font-size:0.7rem;color:#666;margin-bottom:4px;">📚 SCRIPTURE</div>
-      <div style="font-size:1.1rem;font-weight:700;color:#c9a96e;">{sc}</div>
-    </div>
-    <div>
-      <div style="font-size:0.7rem;color:#666;margin-bottom:4px;">🌐 LANGUAGE</div>
-      <div style="font-size:1.1rem;font-weight:700;color:#e8e0d4;">{lg}</div>
-    </div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
-import streamlit as st
-import sys
-from pathlib import Path
-
-ROOT = Path(__file__).parent.parent.resolve()
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-from utils.styles import SHARED_CSS
-from utils.helpers import summarize_text, translate_text, make_pdf, make_docx, TABLE_COLUMNS, markdown_table_to_html, TABLE_CSS, LANGUAGES
-
-st.set_page_config(page_title="Document Combiner · Wisdom Distiller", page_icon="📄", layout="centered")
-st.markdown(SHARED_CSS, unsafe_allow_html=True)
-
-anthropic_key = st.session_state.get("anthropic_key", "")
-if not anthropic_key:
-    try: anthropic_key = st.secrets["ANTHROPIC_API_KEY"]
-    except: pass
-
-st.markdown("""
-<div class="hero">
-    <h1>📄 Document <span class="accent">Combiner</span></h1>
-    <p class="subtitle">Upload multiple transcripts · Merge into one unified document · Export as PDF or Word</p>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div class="about-box">
-    Have multiple transcripts or summaries saved as <b>.txt files</b>? Upload them here in the correct
-    order — the app will merge them into a single cohesive document and optionally re-summarize the
-    combined content. Export the final result as <b>PDF or DOCX</b>.
-</div>
-""", unsafe_allow_html=True)
+    sp  = r.get("speaker", "") or "—"
+    tp  = r.get("topic", "") or "—"
+    sc  = r.get("scripture", "") or "—"
+    lg  = r.get("language", "English (default)") or "English (default)"
+    insights = r.get("insights", {})
+    verses   = insights.get("scriptures", [])
+    terms    = insights.get("key_terms", [])
+    verse_str = " · ".join(verses) if verses else "—"
+    terms_str = " · ".join(terms)  if terms  else "—"
+    verses_row = ""
+    if verses or terms:
+        verses_row = (
+            f"<div style='border-top:1px solid #2a2a2a;padding:0.6rem 1.2rem;'>"
+            f"<span style='font-size:0.7rem;color:#666;text-transform:uppercase;"
+            f"letter-spacing:0.8px;'>📜 Verses Referenced</span>&nbsp;&nbsp;"
+            f"<span style='font-size:0.85rem;color:#c9a96e;'>{verse_str}</span>"
+            f"<br/>"
+            f"<span style='font-size:0.7rem;color:#666;text-transform:uppercase;"
+            f"letter-spacing:0.8px;'>🔑 Key Terms</span>&nbsp;&nbsp;"
+            f"<span style='font-size:0.85rem;color:#b8a88a;font-style:italic;'>{terms_str}</span>"
+            f"</div>"
+        )
+    st.markdown(
+        f"<div style='background:#111;border:1px solid #2a2a2a;border-top:4px solid #c9a96e;"
+        f"border-radius:12px;padding:1.4rem 2rem 0;margin-bottom:1.5rem;'>"
+        f"<div style='font-size:0.7rem;color:#c9a96e;text-transform:uppercase;"
+        f"letter-spacing:1px;font-weight:600;margin-bottom:1rem;'>✦ Discourse Details</div>"
+        f"<div style='display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;padding-bottom:1rem;'>"
+        f"<div><div style='font-size:0.7rem;color:#666;margin-bottom:4px;'>🎙️ SPEAKER</div>"
+        f"<div style='font-size:1.1rem;font-weight:700;color:#e8e0d4;'>{sp}</div></div>"
+        f"<div><div style='font-size:0.7rem;color:#666;margin-bottom:4px;'>📖 TOPIC</div>"
+        f"<div style='font-size:1.1rem;font-weight:700;color:#e8e0d4;'>{tp}</div></div>"
+        f"<div><div style='font-size:0.7rem;color:#666;margin-bottom:4px;'>📚 SCRIPTURE</div>"
+        f"<div style='font-size:1.1rem;font-weight:700;color:#c9a96e;'>{sc}</div></div>"
+        f"<div><div style='font-size:0.7rem;color:#666;margin-bottom:4px;'>🌐 LANGUAGE</div>"
+        f"<div style='font-size:1.1rem;font-weight:700;color:#e8e0d4;'>{lg}</div></div>"
+        f"</div>"
+        f"{verses_row}"
+        f"</div>",
+        unsafe_allow_html=True
+    )
 
 # ── Upload ─────────────────────────────────────────────────────────────────────
 st.markdown('<div class="step-label">Step 1 — Upload Transcripts</div>', unsafe_allow_html=True)
@@ -200,3 +175,4 @@ if uploaded_txts:
 
         except Exception as e:
             st.error(f"❌ Error: {e}")
+
