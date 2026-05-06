@@ -11,6 +11,12 @@ from utils.styles import SHARED_CSS
 st.set_page_config(page_title="About · Wisdom Distiller", page_icon="🕉️", layout="centered")
 st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
+# ── Home button in sidebar ────────────────────────────────────────────────────
+with st.sidebar:
+    st.page_link("app.py", label="🏠 Home")
+    st.markdown("<hr style='border-color:#1e1e1e; margin:0.3rem 0 0.8rem;'/>", unsafe_allow_html=True)
+
+
 def img_b64(path: str, mime: str = "image/jpeg") -> str:
     with open(path, "rb") as f:
         return f"data:{mime};base64,{base64.b64encode(f.read()).decode()}"
@@ -141,4 +147,3 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
