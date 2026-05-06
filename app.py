@@ -1,0 +1,365 @@
+import streamlit as st
+import base64
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).parent.resolve()
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from utils.styles import SHARED_CSS
+
+st.set_page_config(
+    page_title="Wisdom Distiller · Suma AI Hub",
+    page_icon="🕉️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+st.markdown(SHARED_CSS, unsafe_allow_html=True)
+
+# ── iPhone home screen icon ────────────────────────────────────────────────────
+
+
+# Nav card button styling
+st.markdown("""
+<style>
+div[data-testid="column"] .stButton > button {
+    background: transparent !important;
+    color: #c9a96e !important;
+    border: 1px solid #c9a96e !important;
+    border-radius: 8px !important;
+    font-size: 0.82rem !important;
+    padding: 0.35rem 1rem !important;
+    margin-top: 0.6rem;
+    width: 100%;
+}
+div[data-testid="column"] .stButton > button:hover {
+    background: #c9a96e !important;
+    color: #0a0a0a !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# ── Load images ────────────────────────────────────────────────────────────────
+def img_b64(path: str, mime: str = "image/jpeg") -> str:
+    with open(path, "rb") as f:
+        return f"data:{mime};base64,{base64.b64encode(f.read()).decode()}"
+
+om_path = Path(__file__).parent / "Om.jpeg"
+om_tag = (f'<img class="om" src="{img_b64(str(om_path))}" alt="Om"/>'
+          if om_path.exists() else '<div style="font-size:2.5rem">🕉️</div>')
+
+# iPhone home screen icon — served as static file
+st.markdown(
+    '<link rel="apple-touch-icon" href="./app/static/apple-touch-icon.png">'
+    '<link rel="apple-touch-icon-precomposed" href="./app/static/apple-touch-icon.png">',
+    unsafe_allow_html=True
+)
+
+headshot_path = Path(__file__).parent / "headshot.jpeg"
+if headshot_path.exists():
+    hs_src = img_b64(str(headshot_path))
+    avatar_tag = (
+        f'<img src="{hs_src}" alt="Suma Rajashankar"'
+        ' style="width:110px;height:110px;border-radius:50%;object-fit:cover;'
+        'border:3px solid #c9a96e;display:block;margin:0 auto 0.6rem;'
+        'box-shadow:0 0 20px rgba(201,169,110,0.3);"/>'
+    )
+else:
+    avatar_tag = '<div class="bio-avatar-placeholder">SR</div>'
+
+# Try multiple possible filenames for Gurudev photo
+gurudev_img = '<div style="font-size:3rem;text-align:center;">🕉️</div>'
+for _gd_name in ["gurudev.jpeg", "gurudev.jpg", "Gurudev.jpg", "Gurudev.jpeg"]:
+    _gd_path = Path(__file__).parent / _gd_name
+    if _gd_path.exists():
+        _gd_src = img_b64(str(_gd_path))
+        gurudev_img = (
+            '<img src="' + _gd_src + '" alt="Pujya Swami Chinmayananda"'
+            ' style="width:150px;height:170px;object-fit:cover;object-position:top;'
+            'border-radius:10px;border:2px solid #c9a96e;'
+            'box-shadow:0 0 24px rgba(201,169,110,0.4);display:block;margin:0 auto;"/>'
+        )
+        break
+
+
+# ── Sidebar ────────────────────────────────────────────────────────────────────
+with st.sidebar:
+    # ── Theme toggle ────────────────────────────────────────────────────────────
+    if "theme" not in st.session_state:
+        st.session_state["theme"] = "dark"
+    _is_dark = st.session_state.get("theme", "dark") == "dark"
+    _lbl = "☀️ Switch to Light Mode" if _is_dark else "🌙 Switch to Dark Mode"
+    if st.button(_lbl, key="theme_toggle", use_container_width=True):
+        st.session_state["theme"] = "light" if _is_dark else "dark"
+        st.rerun()
+    st.markdown("<hr style='border-color:#2a2a2a;margin:0.5rem 0;'/>",
+                unsafe_allow_html=True)
+
+    st.markdown(
+        f'<div style="text-align:center; padding:0.8rem 0 0.4rem;">'
+        f'{avatar_tag}'
+        f'<p style="font-family:Cormorant Garamond,serif; font-size:1.05rem;'
+        f' font-weight:600; color:#e8e0d4; margin:0 0 0.15rem;">Suma Rajashankar</p>'
+        f'<p style="font-size:0.72rem; color:#c9a96e; letter-spacing:0.4px;'
+        f' text-transform:uppercase; margin:0 0 0.5rem;">Senior Data Scientist / AI Engineer</p>'
+        f'<div style="font-size:0.78rem;">'
+        f'<a href="About" target="_self"'
+        f' style="color:#c9a96e; text-decoration:none; border-bottom:1px dashed #c9a96e;">'
+        f'✦ About Me &amp; Full Bio</a></div></div>'
+        f'<hr style="border-color:#1e1e1e; margin:0.8rem 0;"/>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown("### ⚙️ API Keys")
+
+    try:
+        anthropic_key = st.secrets["ANTHROPIC_API_KEY"]
+        st.success("✅ Anthropic key loaded")
+    except Exception:
+        anthropic_key = st.text_input("Anthropic API Key", type="password", placeholder="sk-ant-...")
+
+    try:
+        openai_key = st.secrets["OPENAI_API_KEY"]
+        st.success("✅ OpenAI key loaded")
+    except Exception:
+        openai_key = st.text_input("OpenAI API Key", type="password", placeholder="sk-...")
+
+    st.session_state["anthropic_key"] = anthropic_key
+    st.session_state["openai_key"] = openai_key
+
+    st.markdown("---")
+    st.markdown(
+        "<div style='background:#0d0d0d; border-left:2px solid #c9a96e;"
+        " padding:0.8rem 1rem; border-radius:6px; margin-bottom:0.5rem;'>"
+        "<div style='font-size:0.78rem; color:#c9a96e; font-weight:500;"
+        " margin-bottom:0.5rem;'>🔹 With Reverence and Gratitude</div>"
+        "<div style='font-size:0.75rem; color:#777; line-height:1.75; font-style:italic;'>"
+        "I offer my humble pran\u0101ms and heartfelt gratitude to "
+        "P\u016bjya Swami Apar\u0101jit\u0101nandaj\u012b and "
+        "P\u016bjya Sw\u0101m\u012b \u015aara\u1e47\u0101nanda j\u012b. "
+        "Their teachings, guidance, and unwavering dedication to the "
+        "Guru\u2013\u015ai\u1e63ya Parampar\u0101 continue to inspire "
+        "and shape this humble effort."
+        "</div></div>",
+        unsafe_allow_html=True
+    )
+    st.markdown("<small style='color:#444'>🕉️ vedantadhara.com</small>",
+                unsafe_allow_html=True)
+
+
+# ── Hero ───────────────────────────────────────────────────────────────────────
+st.markdown(
+    f'<div class="hero">'
+    f'{om_tag}'
+    f'<h1>Wisdom <span class="accent">Distiller</span></h1>'
+    f'<div style="font-family:Cormorant Garamond,serif; font-style:italic;'
+    f' font-size:1.05rem; color:#c9a96e; letter-spacing:1px; margin:0.3rem 0 0.1rem;">'
+    f'\u015arava\u1e47a &middot; Manana &middot; Nididhy\u0101sana</div>'
+    f'<div style="font-size:0.82rem; color:#aaa; letter-spacing:0.8px; margin-bottom:0.2rem;">'
+    f'<div style="font-size:0.82rem; color:#aaa; letter-spacing:0.8px; margin-bottom:0.2rem;">'
+    'श्रवण · मनन · निदिध्यासन</div>'
+    f'<div style="font-size:0.78rem; color:#999; font-style:italic; letter-spacing:0.5px;">'
+    f'Listening &middot; Reflection &middot; Contemplation</div>'
+    f'<p class="subtitle" style="margin-top:0.6rem;">'
+    f'Transcribe &middot; Summarize &middot; Export &middot; Audio &middot; Video &middot; Documents</p>'
+    f'</div>',
+    unsafe_allow_html=True
+)
+
+# ── Tagline — centered ─────────────────────────────────────────────────────────
+st.markdown(
+    "<div style='text-align:center; padding:1.5rem 2rem 1rem; max-width:700px; margin:0 auto;'>"
+    "<div style='font-family:Cormorant Garamond,serif; font-size:1.6rem; font-weight:600;"
+    " line-height:1.4; color:#f0e8d8; margin-bottom:1rem;'>"
+    "Distill the wisdom of sacred discourses into<br/>"
+    "<span style='color:#c9a96e;'>clear, lasting insights.</span>"
+    "</div>"
+    "<div style='font-size:0.95rem; color:#aaa; line-height:1.85; margin:0 auto 1.2rem;'>"
+    "Upload your spiritual discourses \u2014 in audio or video \u2014 and receive a beautifully "
+    "structured transcript, summary, and table of key teachings, with Sanskrit terms "
+    "transliterated into English. Output available in "
+    "<b style='color:#b8a88a;'>English (default)</b>, "
+    "<b style='color:#b8a88a;'>Hindi</b>, "
+    "<b style='color:#b8a88a;'>Kannada</b>, "
+    "<b style='color:#b8a88a;'>Telugu</b>, and "
+    "<b style='color:#b8a88a;'>Tamil</b>."
+    "</div>"
+    "<div style='display:flex; gap:1.2rem; flex-wrap:wrap;"
+    " align-items:center; justify-content:center;'>"
+    "<span style='color:#c9a96e;'>\u2756</span>"
+    "<span style='font-size:0.82rem; color:#999;'>AI-Powered Transcription</span>"
+    "<span style='color:#c9a96e;'>\u2756</span>"
+    "<span style='font-size:0.82rem; color:#999;'>Sanskrit Transliteration</span>"
+    "<span style='color:#c9a96e;'>\u2756</span>"
+    "<span style='font-size:0.82rem; color:#999;'>Export as PDF or Word</span>"
+    "<span style='color:#c9a96e;'>\u2756</span>"
+    "<span style='font-size:0.82rem; color:#999;'>5 Language Outputs</span>"
+    "</div></div>",
+    unsafe_allow_html=True
+)
+
+# ── About box ──────────────────────────────────────────────────────────────────
+st.markdown(
+    "<div class='about-box'>"
+    "<b>Welcome to Wisdom Distiller</b> \u2014 an AI-powered platform for transcribing and "
+    "summarizing spiritual discourses, lectures, and educational content. "
+    "Upload <b>audio files</b> (MP3, WAV, M4A) or <b>video files</b> (MP4) \u2014 "
+    "get back a clean transcript, structured summary, or a beautifully formatted table "
+    "of key insights, with Sanskrit terms transliterated into English. "
+    "Output available in <b>English</b>, <b>Hindi</b>, <b>Kannada</b>, "
+    "<b>Telugu</b>, and <b>Tamil</b>. Click any tool below to get started."
+    "</div>",
+    unsafe_allow_html=True
+)
+
+# ── Navigation cards ───────────────────────────────────────────────────────────
+st.markdown("## Choose a Tool")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown(
+        "<div style='background:#111; border:1px solid #2a2a2a; border-top:3px solid #c9a96e;"
+        " border-radius:12px; padding:1.2rem; text-align:center; min-height:140px;'>"
+        "<div style='font-size:1.8rem; margin-bottom:0.4rem;'>🎙️</div>"
+        "<div style='font-family:Cormorant Garamond,serif; font-size:1.1rem;"
+        " color:#e8e0d4; margin-bottom:0.4rem;'>Audio Summarizer</div>"
+        "<div style='font-size:0.78rem; color:#888;'>Upload 1\u20135 MP3/WAV/M4A files</div>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+    if st.button("🎙️ Open Audio Summarizer", key="btn_audio"):
+        st.switch_page("pages/2_Audio_Summarizer.py")
+
+with col2:
+    st.markdown(
+        "<div style='background:#111; border:1px solid #2a2a2a; border-top:3px solid #c9a96e;"
+        " border-radius:12px; padding:1.2rem; text-align:center; min-height:140px;'>"
+        "<div style='font-size:1.8rem; margin-bottom:0.4rem;'>🎬</div>"
+        "<div style='font-family:Cormorant Garamond,serif; font-size:1.1rem;"
+        " color:#e8e0d4; margin-bottom:0.4rem;'>Video Summarizer</div>"
+        "<div style='font-size:0.78rem; color:#888;'>YouTube URL or MP4 upload</div>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+    if st.button("🎬 Open Video Summarizer", key="btn_video"):
+        st.switch_page("pages/3_Video_Summarizer.py")
+
+with col3:
+    st.markdown(
+        "<div style='background:#111; border:1px solid #2a2a2a; border-top:3px solid #c9a96e;"
+        " border-radius:12px; padding:1.2rem; text-align:center; min-height:140px;'>"
+        "<div style='font-size:1.8rem; margin-bottom:0.4rem;'>📄</div>"
+        "<div style='font-family:Cormorant Garamond,serif; font-size:1.1rem;"
+        " color:#e8e0d4; margin-bottom:0.4rem;'>Document Combiner</div>"
+        "<div style='font-size:0.78rem; color:#888;'>Merge multiple transcripts</div>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+    if st.button("📄 Open Document Combiner", key="btn_doc"):
+        st.switch_page("pages/4_Document_Combiner.py")
+
+st.markdown(
+    "<div style='text-align:center; margin-top:0.5rem;'>"
+    "<small style='color:#444;'>Or use the sidebar navigation to open each tool.</small>"
+    "</div>",
+    unsafe_allow_html=True
+)
+
+# ── Live visitor + session counter ────────────────────────────────────────────
+try:
+    import json
+    from datetime import datetime
+
+    counter_file = Path(__file__).parent / "usage_data.json"
+    visitors_file = Path(__file__).parent / "visitor_log.json"
+
+    # Count unique users from usage_data
+    total_users = 0
+    total_sessions = 0
+    if counter_file.exists():
+        data = json.loads(counter_file.read_text())
+        total_users = len(data)
+        total_sessions = sum(data.values())
+
+    # Track page visitors (new visit = new session_state)
+    if "page_visit_counted" not in st.session_state:
+        st.session_state["page_visit_counted"] = True
+        visit_data = {}
+        if visitors_file.exists():
+            visit_data = json.loads(visitors_file.read_text())
+        today = datetime.now().strftime("%Y-%m-%d")
+        visit_data[today] = visit_data.get(today, 0) + 1
+        visitors_file.write_text(json.dumps(visit_data))
+
+    # Count total page visits
+    total_visits = 0
+    if visitors_file.exists():
+        visit_data = json.loads(visitors_file.read_text())
+        total_visits = sum(visit_data.values())
+
+    st.markdown(
+        "<div style='text-align:center; padding:1rem 0 0.5rem;'>"
+        "<div style='display:inline-flex; gap:2rem; background:#111; border:1px solid #1e1e1e;"
+        " border-radius:10px; padding:0.6rem 2rem;'>"
+        f"<div style='text-align:center;'>"
+        f"<div style='font-family:Cormorant Garamond,serif; font-size:1.4rem;"
+        f" color:#c9a96e; font-weight:600;'>{total_visits}</div>"
+        f"<div style='font-size:0.7rem; color:#555; text-transform:uppercase;"
+        f" letter-spacing:0.5px;'>Page Visits</div></div>"
+        f"<div style='width:1px; background:#2a2a2a;'></div>"
+        f"<div style='text-align:center;'>"
+        f"<div style='font-family:Cormorant Garamond,serif; font-size:1.4rem;"
+        f" color:#c9a96e; font-weight:600;'>{total_users}</div>"
+        f"<div style='font-size:0.7rem; color:#555; text-transform:uppercase;"
+        f" letter-spacing:0.5px;'>Users</div></div>"
+        f"<div style='width:1px; background:#2a2a2a;'></div>"
+        f"<div style='text-align:center;'>"
+        f"<div style='font-family:Cormorant Garamond,serif; font-size:1.4rem;"
+        f" color:#c9a96e; font-weight:600;'>{total_sessions}</div>"
+        f"<div style='font-size:0.7rem; color:#555; text-transform:uppercase;"
+        f" letter-spacing:0.5px;'>Sessions</div></div>"
+        "</div></div>",
+        unsafe_allow_html=True
+    )
+except Exception:
+    pass
+
+# ── Visitor counter ────────────────────────────────────────────────────────────
+if "visited" not in st.session_state:
+    st.session_state["visited"] = True
+    try:
+        count_file = Path(__file__).parent / "visitor_count.txt"
+        count = int(count_file.read_text().strip()) + 1 if count_file.exists() else 1
+        count_file.write_text(str(count))
+        st.session_state["visitor_count"] = count
+    except Exception:
+        st.session_state["visitor_count"] = 0
+
+# ── Gurudev photo + Quote — at the BOTTOM ─────────────────────────────────────
+st.markdown("<hr style='border-color:#1e1e1e; margin:2rem 0 1.5rem;'/>",
+            unsafe_allow_html=True)
+
+st.markdown(
+    "<div style='text-align:center; padding:1rem 1rem 2rem;'>"
+    + gurudev_img
+    + "<div style='font-size:0.72rem; color:#777; margin-top:8px; font-style:italic;'>"
+    "P\u016bjya Sw\u0101m\u012b Chinmay\u0101nanda</div>"
+    "<div style='font-family:Cormorant Garamond,serif; font-style:italic;"
+    " font-size:1.1rem; color:#c9a96e; line-height:1.9; margin:1rem auto 0;"
+    " max-width:500px;'>"
+    "\u201cRenounce your ego\u201d is the Lord\u2019s only request;<br/>"
+    "\u201cAnd I will make you God\u201d is the promise."
+    "</div>"
+    "<div style='font-family:Cormorant Garamond,serif; font-size:1rem;"
+    " color:#c9a96e; font-style:italic; margin-top:0.5rem;'>"
+    "\u2014 <em>P\u016bjya Sw\u0101m\u012b Chinmay\u0101nanda</em>"
+    "</div>"
+    "<div style='font-size:0.72rem; color:#555; margin-top:0.2rem; font-style:italic;'>"
+    "(P\u016bjya Sw\u0101m\u012b Chinmay\u0101nanda \u2014 the Bliss of Pure Consciousness)"
+    "</div></div>",
+    unsafe_allow_html=True
+)
