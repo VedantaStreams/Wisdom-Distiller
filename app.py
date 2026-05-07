@@ -107,22 +107,72 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-    st.markdown("### ⚙️ API Keys")
+    # ── API Keys ──────────────────────────────────────────────────────────────
+    # Check if keys are pre-loaded via Streamlit Secrets (owner's deployment)
+    _secret_anthropic = st.secrets.get("ANTHROPIC_API_KEY", "")
+    _secret_openai    = st.secrets.get("OPENAI_API_KEY", "")
 
-    try:
-        anthropic_key = st.secrets["ANTHROPIC_API_KEY"]
+    if _secret_anthropic and _secret_openai:
+        # Keys are pre-configured — show green badges, no input needed
+        anthropic_key = _secret_anthropic
+        openai_key    = _secret_openai
+        st.markdown("### ⚙️ API Keys")
         st.success("✅ Anthropic key loaded")
-    except Exception:
-        anthropic_key = st.text_input("Anthropic API Key", type="password", placeholder="sk-ant-...")
-
-    try:
-        openai_key = st.secrets["OPENAI_API_KEY"]
         st.success("✅ OpenAI key loaded")
-    except Exception:
-        openai_key = st.text_input("OpenAI API Key", type="password", placeholder="sk-...")
+    else:
+        # No pre-configured keys — show friendly guided input
+        st.markdown("### ⚙️ Enter Your API Keys")
+        st.markdown(
+            "<div style='background:#111;border:1px solid #2a2a2a;border-left:3px solid #c9a96e;"            "border-radius:8px;padding:0.8rem 1rem;margin-bottom:0.8rem;font-size:0.78rem;color:#888;line-height:1.7;'>"            "<b style='color:#c9a96e;'>First time?</b> This app needs two free API keys to work.<br/>"            "Your keys are <b style='color:#b8a88a;'>never stored</b> — they are only used "            "for your current session and cleared when you close the browser."            "</div>",
+            unsafe_allow_html=True
+        )
+
+        # ── Anthropic key ──────────────────────────────────────────────────
+        with st.expander("🔑 Step 1 — Get your Anthropic (Claude) key", expanded=False):
+            st.markdown(
+                "<div style='font-size:0.78rem;color:#888;line-height:1.8;'>"                "1. Go to <a href='https://console.anthropic.com' target='_blank' "                "style='color:#c9a96e;'>console.anthropic.com</a><br/>"                "2. Sign up for a free account<br/>"                "3. Click <b style='color:#b8a88a;'>API Keys</b> in the left menu<br/>"                "4. Click <b style='color:#b8a88a;'>Create Key</b> and copy it<br/>"                "5. Paste it in the box below"                "</div>",
+                unsafe_allow_html=True
+            )
+
+        anthropic_key = st.text_input(
+            "Anthropic API Key",
+            type="password",
+            placeholder="sk-ant-...",
+            value=st.session_state.get("anthropic_key", ""),
+            help="Starts with sk-ant-  |  Get yours free at console.anthropic.com"
+        )
+        if anthropic_key:
+            st.success("✅ Anthropic key entered")
+        else:
+            st.caption("⬆️ Required for summarization (Claude AI)")
+
+        # ── OpenAI key ─────────────────────────────────────────────────────
+        with st.expander("🔑 Step 2 — Get your OpenAI key", expanded=False):
+            st.markdown(
+                "<div style='font-size:0.78rem;color:#888;line-height:1.8;'>"                "1. Go to <a href='https://platform.openai.com/api-keys' target='_blank' "                "style='color:#c9a96e;'>platform.openai.com/api-keys</a><br/>"                "2. Sign up or log in<br/>"                "3. Click <b style='color:#b8a88a;'>Create new secret key</b><br/>"                "4. Copy the key shown (you won't see it again!)<br/>"                "5. Paste it in the box below"                "</div>",
+                unsafe_allow_html=True
+            )
+
+        openai_key = st.text_input(
+            "OpenAI API Key",
+            type="password",
+            placeholder="sk-...",
+            value=st.session_state.get("openai_key", ""),
+            help="Starts with sk-  |  Get yours free at platform.openai.com"
+        )
+        if openai_key:
+            st.success("✅ OpenAI key entered")
+        else:
+            st.caption("⬆️ Required for audio transcription (Whisper)")
+
+        if not anthropic_key or not openai_key:
+            st.markdown(
+                "<div style='background:#111;border:1px solid #2a2a2a;border-radius:8px;"                "padding:0.6rem 0.8rem;margin-top:0.5rem;font-size:0.75rem;color:#555;"                "text-align:center;'>Both keys needed to use the app</div>",
+                unsafe_allow_html=True
+            )
 
     st.session_state["anthropic_key"] = anthropic_key
-    st.session_state["openai_key"] = openai_key
+    st.session_state["openai_key"]    = openai_key
 
     st.markdown("---")
     st.markdown(
