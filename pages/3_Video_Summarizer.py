@@ -8,6 +8,13 @@ ROOT = Path(__file__).parent.parent.resolve()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+st.set_page_config(
+    page_title="Video Summarizer · Wisdom Distiller",
+    page_icon="🎬",
+    layout="centered",
+    initial_sidebar_state="expanded",
+)
+
 from utils.styles import SHARED_CSS
 from utils.helpers import (
 
@@ -31,6 +38,13 @@ st.markdown(SHARED_CSS, unsafe_allow_html=True)
 with st.sidebar:
     st.page_link("app.py", label="🏠 Home")
     st.markdown("<hr style='border-color:#1e1e1e; margin:0.3rem 0 0.8rem;'/>", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="hero">
+    <h1>🎬 Video <span class="accent">Summarizer</span></h1>
+    <p class="subtitle">YouTube & MP4 · Transcribe · Summarize · Export</p>
+</div>
+""", unsafe_allow_html=True)
 
 def show_discourse_header(r):
     sp  = r.get("speaker", "") or "—"
@@ -429,3 +443,4 @@ if audio_ready_path and os.path.exists(audio_ready_path):
 
         except Exception as e:
             st.error(f"❌ Error: {str(e)}")
+
