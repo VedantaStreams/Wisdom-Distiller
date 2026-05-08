@@ -214,10 +214,13 @@ def transcribe_chunks(chunks: list, openai_key: str,
 # ── Summarization ──────────────────────────────────────────────────────────────
 
 TRANSLITERATION_NOTE = (
-    "When Sanskrit or regional language terms appear in the discourse, "
-    "retain them and provide their English transliteration in parentheses "
-    "immediately after. For example: Atman (the Self), Brahman (the Absolute), "
-    "Maya (illusion). Keep all output in English. "
+    "CRITICAL RULE — SANSKRIT SCRIPT: Whenever a Sanskrit verse, shloka, or mantra "
+    "is referenced or quoted, you MUST display it in the original Devanāgarī script "
+    "ONLY (e.g. ॐ, श्रेयान्स्वधर्मो विगुणः परधर्मात्स्वनुष्ठितात्). "
+    "Do NOT transliterate Sanskrit verses into English or Roman script. "
+    "After the Devanāgarī verse, you may provide the meaning in the output language. "
+    "For Sanskrit terms and concepts (not full verses), retain the term and "
+    "provide its meaning in parentheses. "
 )
 
 STYLE_PROMPTS = {
@@ -306,8 +309,9 @@ def summarize_text(transcript: str, style: str,
             f"{col_desc}\n\n"
             f"Extract 10-15 key points. Format as a proper markdown table "
             f"with | separators. Leave the Personal Reflection column empty. "
-            f"When Sanskrit or regional terms appear, add English meaning in "
-            f"parentheses after them."
+            f"CRITICAL: Any Sanskrit verse or shloka MUST appear in Devanāgarī script only "
+            f"(never in Roman/English transliteration). After the Devanāgarī, provide meaning. "
+            f"For Sanskrit terms, add meaning in parentheses."
         )
         return call_claude(prompt, transcript, max_tokens=3000)
     else:
@@ -339,9 +343,13 @@ def translate_text(text, language, anthropic_key):
         "Every word, label, heading, bullet point, and sentence must be in "
         + language + " only. "
         "Do NOT leave any English words in the output except for: "
-        "Sanskrit terms (Atman, Brahman, Maya, Upanishads, Bhagavad Gita, etc.), "
         "proper nouns (names of people and places), "
         "and technical terms that have no equivalent in " + language + ". "
+        "CRITICAL — SANSKRIT SCRIPT: Any Sanskrit verse, shloka, or mantra "
+        "MUST remain in Devanāgarī script (e.g. नमस्ते, ॐ तत् सत्). "
+        "Do NOT transliterate Sanskrit verses into Roman script or " + language + " script. "
+        "Sanskrit concepts (Ātman, Brahman, Maya etc.) may be kept as-is or transliterated "
+        "into the target language script — but full verses stay in Devanāgarī only. "
         "Preserve the structure, formatting, bullet points, and headings exactly. "
         "The entire output must read as natural, fluent " + language + "."
     )
@@ -985,3 +993,4 @@ TABLE_CSS = (
     "table td:last-child, table th:last-child { border-right: none; }"
     "</style>"
 )
+
