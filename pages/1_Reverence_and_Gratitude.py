@@ -2,6 +2,7 @@ import streamlit as st
 import base64
 import sys
 from pathlib import Path
+from PIL import Image
 
 ROOT = Path(__file__).parent.parent.resolve()
 if str(ROOT) not in sys.path:
@@ -19,87 +20,89 @@ with st.sidebar:
     st.page_link("app.py", label="🏠 Home")
     st.markdown("<hr style='border-color:#1e1e1e; margin:0.3rem 0 0.8rem;'/>", unsafe_allow_html=True)
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
-def img_b64(path: str) -> str:
-    ext = Path(path).suffix.lower()
-    mime = "image/png" if ext == ".png" else ("image/jpeg" if ext in (".jpg",".jpeg") else "image/jpeg")
-    with open(path, "rb") as f:
-        return f"data:{mime};base64,{base64.b64encode(f.read()).decode()}"
-
-def swami_card(img_path, name, subtitle, note="", size=160):
-    src = img_b64(img_path) if img_path and Path(img_path).exists() else None
-    if src:
-        img_html = (
-            f"<img src='{src}' style='width:{size}px;height:{size}px;"
-            f"object-fit:cover;object-position:center top;"
-            f"border-radius:50%;border:3px solid #c9a96e;"
-            f"box-shadow:0 0 24px rgba(201,169,110,0.35);display:block;margin:0 auto 0.9rem;'/>"
-        )
-    else:
-        img_html = (
-            f"<div style='width:{size}px;height:{size}px;border-radius:50%;"
-            f"border:3px solid #c9a96e;background:#1a1a1a;"
-            f"display:flex;align-items:center;justify-content:center;"
-            f"font-size:3rem;margin:0 auto 0.9rem;'>🕉️</div>"
-        )
-    note_html = (
-        f"<div style='font-size:0.7rem;color:#555;margin-top:0.25rem;"
-        f"font-style:italic;'>{note}</div>"
-    ) if note else ""
-    return (
-        f"<div style='text-align:center;padding:0.8rem 0.5rem;'>"
-        f"{img_html}"
-        f"<div style='font-family:Cormorant Garamond,serif;font-size:1.05rem;"
-        f"font-weight:600;color:#e8e0d4;margin-bottom:0.15rem;'>{name}</div>"
-        f"<div style='font-size:0.75rem;color:#c9a96e;letter-spacing:0.4px;'>{subtitle}</div>"
-        f"{note_html}"
-        f"</div>"
-    )
-
 # Image paths
-om_path       = ROOT / "Om.jpeg"
-gurudev_path  = ROOT / "Gurudev.jpg"               # Swami Chinmayananda
-aparaji_path  = ROOT / "swami_aparajitananda.jpg"  # Swami Aparājitānandajī
-sarana_path   = ROOT / "swami_sarananda.jpeg"      # Swami Śaraṇānandajī
+om_path      = ROOT / "Om.jpeg"
+gurudev_path = ROOT / "Gurudev.jpg"
+aparaji_path = ROOT / "swami_aparajitananda.jpg"
+sarana_path  = ROOT / "swami_sarananda.jpeg"
 
 # ── Hero ──────────────────────────────────────────────────────────────────────
-om_tag = (
-    f'<img class="om" src="{img_b64(str(om_path))}" alt="Om"/>' 
-    if om_path.exists() else "🕉️"
-)
-st.markdown(f"""
-<div class="hero">
-    {om_tag}
-    <h1>With <span class="accent">Reverence &amp; Gratitude</span></h1>
+if om_path.exists():
+    _, mid, _ = st.columns([2,1,2])
+    with mid:
+        st.image(str(om_path), width=90)
+
+st.markdown("""
+<div style="text-align:center;padding:0.2rem 0 0.6rem;">
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:2.6rem;
+    font-weight:600;color:#e8e0d4;margin:0 0 0.2rem;">
+        With <span style="color:#c9a96e;">Reverence &amp; Gratitude</span>
+    </h1>
 </div>
 """, unsafe_allow_html=True)
 
 st.markdown("""
-<div style="text-align:center;padding:0.5rem 0 1.2rem;">
+<div style="text-align:center;padding:0.3rem 0 1.2rem;">
     <div style="font-size:1.2rem;color:#c9a96e;letter-spacing:6px;">✦ ✦ ✦</div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── Swami Chinmayananda — centred, larger ─────────────────────────────────────
+# ── Helper: label block ────────────────────────────────────────────────────────
+def swami_label(name, subtitle, note=""):
+    note_html = f"<div style='font-size:0.7rem;color:#555;font-style:italic;margin-top:0.2rem;'>{note}</div>" if note else ""
+    st.markdown(
+        f"<div style='text-align:center;padding:0.5rem 0 0.8rem;'>"
+        f"<div style='font-family:Cormorant Garamond,serif;font-size:1.05rem;"
+        f"font-weight:600;color:#e8e0d4;margin-bottom:0.1rem;'>{name}</div>"
+        f"<div style='font-size:0.75rem;color:#c9a96e;letter-spacing:0.4px;'>{subtitle}</div>"
+        f"{note_html}</div>",
+        unsafe_allow_html=True
+    )
+
+def gold_circle_css(key):
+    """Inject CSS to make a specific image circular with gold border."""
+    st.markdown(
+        f"<style>div[data-testid='stImage'][id='{key}'] img, "
+        f"div[data-testid='stImage'] img {{border-radius:50% !important;"
+        f"border:3px solid #c9a96e !important;"
+        f"box-shadow:0 0 24px rgba(201,169,110,0.35) !important;}}</style>",
+        unsafe_allow_html=True
+    )
+
+# Apply circular gold styling to all images on this page
+st.markdown("""
+<style>
+[data-testid="stImage"] img {
+    border-radius: 50% !important;
+    border: 3px solid #c9a96e !important;
+    box-shadow: 0 0 24px rgba(201,169,110,0.35) !important;
+    display: block;
+    margin: 0 auto;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ── Swami Chinmayananda ────────────────────────────────────────────────────────
 st.markdown("""
 <div style='text-align:center;margin-bottom:0.6rem;'>
     <div style='font-size:0.7rem;color:#c9a96e;text-transform:uppercase;
     letter-spacing:1.5px;'>In Devotion &amp; Remembrance</div>
 </div>""", unsafe_allow_html=True)
 
-col_l, col_c, col_r = st.columns([1, 2, 1])
-with col_c:
-    st.markdown(swami_card(
-        str(gurudev_path),
+_, mid, _ = st.columns([1.5, 1, 1.5])
+with mid:
+    if gurudev_path.exists():
+        img = Image.open(str(gurudev_path))
+        st.image(img, width=190)
+    swami_label(
         "Pūjya Swāmī Chinmayānandajī",
         "Founder · Chinmaya Mission",
-        note="May his eternal light guide all seekers",
-        size=190
-    ), unsafe_allow_html=True)
+        note="May his eternal light guide all seekers"
+    )
 
-st.markdown("<hr style='border-color:#1e1e1e;margin:1rem 0 1.2rem;'/>", unsafe_allow_html=True)
+st.markdown("<hr style='border-color:#1e1e1e;margin:0.8rem 0 1.2rem;'/>", unsafe_allow_html=True)
 
-# ── Aparājitānandajī & Śaraṇānandajī side by side ────────────────────────────
+# ── Aparājitānandajī & Śaraṇānandajī ──────────────────────────────────────────
 st.markdown("""
 <div style='text-align:center;margin-bottom:0.6rem;'>
     <div style='font-size:0.7rem;color:#c9a96e;text-transform:uppercase;
@@ -108,19 +111,16 @@ st.markdown("""
 
 col1, col2 = st.columns(2)
 with col1:
-    st.markdown(swami_card(
-        str(aparaji_path),
-        "Swami Aparājitānandajī",
-        "Chinmaya Mission",
-        size=165
-    ), unsafe_allow_html=True)
+    if aparaji_path.exists():
+        img2 = Image.open(str(aparaji_path))
+        st.image(img2, width=165)
+    swami_label("Swami Aparājitānandajī", "Chinmaya Mission")
+
 with col2:
-    st.markdown(swami_card(
-        str(sarana_path),
-        "Swāmī Śaraṇānandajī",
-        "Chinmaya Mission",
-        size=165
-    ), unsafe_allow_html=True)
+    if sarana_path.exists():
+        img3 = Image.open(str(sarana_path))
+        st.image(img3, width=165)
+    swami_label("Swāmī Śaraṇānandajī", "Chinmaya Mission")
 
 st.markdown("<hr style='border-color:#1e1e1e;margin:1.5rem 0;'/>", unsafe_allow_html=True)
 
@@ -156,7 +156,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ── Quote block ────────────────────────────────────────────────────────────────
+# ── Quote ──────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="max-width:660px;margin:0 auto;">
     <div style="background:#0d0d0d;border:1px solid #1e1e1e;border-radius:12px;
@@ -179,4 +179,5 @@ st.markdown("""
     <div style="font-size:1.3rem;letter-spacing:8px;">🪷 🕉️ 🪷</div>
 </div>
 """, unsafe_allow_html=True)
+
 
