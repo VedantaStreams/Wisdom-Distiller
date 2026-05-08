@@ -78,7 +78,7 @@ with tab_iphone:
         " padding:1.4rem 1.8rem; margin-bottom:1rem;'>"
         "<div style='font-size:0.84rem; color:#888; line-height:2.1;'>"
         "<b style='color:#b8a88a;'>1.</b> Open <b>Safari</b> on your iPhone<br/>"
-        "<b style='color:#b8a88a;'>2.</b> Visit your app URL (e.g. <span style='color:#c9a96e;'>vedantastreams-discourse-summary.streamlit.app</span> or <span style='color:#c9a96e;'>app.vedantadhara.com</span>)<br/>"
+        "<b style='color:#b8a88a;'>2.</b> Visit your app URL (e.g. <span style='color:#c9a96e;'>vedantadhara.streamlit.app</span>)<br/>"
         "<b style='color:#b8a88a;'>3.</b> Tap the <b>Share button</b> "
         "(square with arrow, bottom of screen)<br/>"
         "<b style='color:#b8a88a;'>4.</b> Scroll and tap <b>Add to Home Screen</b><br/>"
@@ -138,7 +138,7 @@ with tab_android:
         " padding:1.4rem 1.8rem; margin-bottom:1rem;'>"
         "<div style='font-size:0.84rem; color:#888; line-height:2.1;'>"
         "<b style='color:#b8a88a;'>1.</b> Open <b>Chrome</b> on your Android phone<br/>"
-        "<b style='color:#b8a88a;'>2.</b> Visit your app URL (e.g. <span style='color:#c9a96e;'>vedantastreams-discourse-summary.streamlit.app</span> or <span style='color:#c9a96e;'>app.vedantadhara.com</span>)<br/>"
+        "<b style='color:#b8a88a;'>2.</b> Visit your app URL (e.g. <span style='color:#c9a96e;'>vedantadhara.streamlit.app</span>)<br/>"
         "<b style='color:#b8a88a;'>3.</b> Tap the <b>three dots menu</b> (top right)<br/>"
         "<b style='color:#b8a88a;'>4.</b> Tap <b>Add to Home screen</b><br/>"
         "<b style='color:#b8a88a;'>5.</b> Tap <b>Add</b> — icon appears on home screen!"
@@ -519,7 +519,7 @@ with tab_share:
         "I would like to share a tool I have built for transcribing and summarizing "
         "spiritual discourses using AI. You can use it to get structured summaries "
         "of Vedanta lectures, Chinmaya Mission talks, Upanishad classes, and more.<br/><br/>"
-        "<b style='color:#888;'>Access it here:</b> [paste your Streamlit URL]<br/><br/>"
+        "<b style='color:#888;'>Access it here:</b> https://vedantadhara.streamlit.app<br/><br/>"
         "<b style='color:#888;'>On iPhone:</b> Open in Safari &#8594; tap Share "
         "&#8594; Add to Home Screen<br/>"
         "<b style='color:#888;'>On Android:</b> Open in Chrome &#8594; tap Menu "
@@ -565,3 +565,4 @@ with tab_share:
         "</div></div>",
         unsafe_allow_html=True
     )
+
