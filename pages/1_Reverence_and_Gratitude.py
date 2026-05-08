@@ -114,18 +114,41 @@ st.markdown("""
     letter-spacing:1.5px;'>With Deep Gratitude &amp; Humble Pranāms</div>
 </div>""", unsafe_allow_html=True)
 
-col1, col2 = st.columns(2, gap="large")
-with col1:
-    if aparaji_path.exists():
-        aparaji_sq = square_crop(aparaji_path, size=300)
-        st.image(aparaji_sq, width=165)
-    swami_label("Swāmī Aparājitānandajī", "Chinmaya Mission")
+# Use base64 for both images rendered inside pure HTML so alignment is pixel-perfect
+import base64 as _b64
 
-with col2:
-    if sarana_path.exists():
-        sarana_sq = square_crop(sarana_path, size=300)
-        st.image(sarana_sq, width=165)
-    swami_label("Swāmī Śaraṇānandajī", "Chinmaya Mission")
+def _img_src(path, size=300):
+    img = square_crop(path, size)
+    buf = __import__('io').BytesIO()
+    img.save(buf, format='JPEG', quality=90)
+    return "data:image/jpeg;base64," + _b64.b64encode(buf.getvalue()).decode()
+
+aparaji_src = _img_src(aparaji_path) if aparaji_path.exists() else ""
+sarana_src  = _img_src(sarana_path)  if sarana_path.exists()  else ""
+
+circle_style = (
+    "width:165px;height:165px;object-fit:cover;border-radius:50%;"
+    "border:3px solid #c9a96e;box-shadow:0 0 24px rgba(201,169,110,0.35);"
+    "display:block;margin:0 auto 0.7rem;"
+)
+
+st.markdown(f"""
+<div style='display:flex;justify-content:center;align-items:flex-start;
+            gap:80px;padding:0.5rem 0 1rem;'>
+  <div style='text-align:center;flex:0 0 auto;'>
+    <img src='{aparaji_src}' style='{circle_style}'/>
+    <div style='font-family:Cormorant Garamond,serif;font-size:1.05rem;
+    font-weight:600;color:#e8e0d4;margin-bottom:0.1rem;'>Swāmī Aparājitānandajī</div>
+    <div style='font-size:0.75rem;color:#c9a96e;letter-spacing:0.4px;'>Chinmaya Mission</div>
+  </div>
+  <div style='text-align:center;flex:0 0 auto;'>
+    <img src='{sarana_src}' style='{circle_style}'/>
+    <div style='font-family:Cormorant Garamond,serif;font-size:1.05rem;
+    font-weight:600;color:#e8e0d4;margin-bottom:0.1rem;'>Swāmī Śaraṇānandajī</div>
+    <div style='font-size:0.75rem;color:#c9a96e;letter-spacing:0.4px;'>Chinmaya Mission</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("<hr style='border-color:#1e1e1e;margin:1.5rem 0;'/>", unsafe_allow_html=True)
 
@@ -210,3 +233,4 @@ st.markdown("""
     <div style="font-size:1.3rem;letter-spacing:8px;">🪷 🕉️ 🪷</div>
 </div>
 """, unsafe_allow_html=True)
+
