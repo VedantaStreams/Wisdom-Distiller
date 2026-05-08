@@ -71,7 +71,7 @@ st.markdown("""
 <p>I am <b style="color:#b8a88a;">Suma Rajashankar</b>, a sincere student and earnest seeker
 of Vedānta, deeply grateful for the opportunity to learn from the timeless wisdom of the
 scriptures and the guidance of revered teachers. Though professionally engaged in the field of
-<b style="color:#b8a88a;">AI and Data Science</b>, my deepest inspiration comes from the study
+<b style="color:#b8a88a;">AI and Data Science</b>, as a Senior Data Scientist/AI Engineer at Capital One, my deepest inspiration comes from the study
 of Vedānta and the lifelong journey of spiritual learning.</p>
 
 <p>Over the years, I have been blessed with opportunities to teach, mentor, and work across
