@@ -133,9 +133,40 @@ def call_extractor(transcript: str, anthropic_key: str) -> dict:
     with urllib.request.urlopen(req, timeout=120) as resp:
         data = json.loads(resp.read())
     raw = data["content"][0]["text"].strip()
+
+    # Strategy 1: strip markdown fences
     raw = re.sub(r"^```json\s*", "", raw)
+    raw = re.sub(r"^```\s*", "", raw)
     raw = re.sub(r"\s*```$", "", raw)
-    return json.loads(raw)
+    raw = raw.strip()
+
+    # Strategy 2: if still not valid JSON, extract the { ... } block
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        # Find the first { and last } and extract that substring
+        start = raw.find("{")
+        end   = raw.rfind("}") + 1
+        if start != -1 and end > start:
+            candidate = raw[start:end]
+            try:
+                return json.loads(candidate)
+            except json.JSONDecodeError:
+                pass
+
+        # Strategy 3: fix common issues — unescaped quotes inside strings,
+        # trailing commas before closing brackets
+        cleaned = re.sub(r',\s*}', '}', raw)
+        cleaned = re.sub(r',\s*]', ']', cleaned)
+        try:
+            return json.loads(cleaned)
+        except json.JSONDecodeError:
+            # Last resort: extract again from cleaned
+            start = cleaned.find("{")
+            end   = cleaned.rfind("}") + 1
+            if start != -1 and end > start:
+                return json.loads(cleaned[start:end])
+            raise
 
 
 THEME_COLORS = {
@@ -407,6 +438,8 @@ if st.button("🌊 Extract Quotes", key="qs_process", use_container_width=True):
                 st.session_state["qs_result"] = result
             except json.JSONDecodeError as e:
                 st.error(f"Could not parse AI response as JSON: {e}")
+                with st.expander("🔍 Raw AI response (for debugging)"):
+                    st.text(str(e))
             except Exception as e:
                 st.error(f"Extraction failed: {e}")
 
@@ -418,3 +451,4 @@ if "qs_result" in st.session_state:
         for k in ["qs_result", "qs_transcript"]:
             st.session_state.pop(k, None)
         st.rerun()
+
