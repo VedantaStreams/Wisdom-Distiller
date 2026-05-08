@@ -279,19 +279,53 @@ def render_results(result: dict):
     st.markdown("<br/>", unsafe_allow_html=True)
     st.markdown("<div class='step-label'>Export</div>", unsafe_allow_html=True)
     lines = [
-        f"SPEAKER: {result.get('speaker','')}",
-        f"TOPIC: {result.get('topic','')}",
-        f"SCRIPTURE: {result.get('scripture','')}",
-        "", f"BEST QUOTE:\n\"{result.get('best_quote','')}\"",
-        "", f"YOUTUBE TITLE:\n{result.get('youtube_title','')}",
-        "", f"MAIN TAKEAWAY:\n{result.get('main_takeaway','')}",
-        "", f"REEL CAPTION:\n{result.get('reel_caption','')}",
-        "", f"HASHTAGS:\n{' '.join(result.get('hashtags',[]))}",
-        "", "═"*50, "ALL QUOTES", "═"*50,
+        "══════════════════════════════════════════════════",
+        "                  QUOTE STREAM",
+        "══════════════════════════════════════════════════",
+        "",
+        f"  SPEAKER:    {result.get('speaker','')}",
+        f"  TOPIC:      {result.get('topic','')}",
+        f"  SCRIPTURE:  {result.get('scripture','')}",
+        "",
+        "──────────────────────────────────────────────────",
+        "  ★ BEST QUOTE",
+        "──────────────────────────────────────────────────",
+        f'  "{result.get("best_quote","")}"',
+        "",
+        "──────────────────────────────────────────────────",
+        "  ▶ YOUTUBE TITLE",
+        "──────────────────────────────────────────────────",
+        f"  {result.get('youtube_title','')}",
+        "",
+        "──────────────────────────────────────────────────",
+        "  ✨ MAIN TAKEAWAY",
+        "──────────────────────────────────────────────────",
+        f"  {result.get('main_takeaway','')}",
+        "",
+        "──────────────────────────────────────────────────",
+        "  📱 REEL CAPTION",
+        "──────────────────────────────────────────────────",
+        f"  {result.get('reel_caption','')}",
+        "",
+        "──────────────────────────────────────────────────",
+        "  # HASHTAGS",
+        "──────────────────────────────────────────────────",
+        f"  {' '.join(result.get('hashtags',[]))}",
+        "",
+        "══════════════════════════════════════════════════",
+        "  ALL EXTRACTED QUOTES",
+        "══════════════════════════════════════════════════",
     ]
-    for q in result.get("quotes", []):
-        lines += [f"\n[{q.get('theme','')}]", f'"{q.get("text","")}"']
+    for i, q in enumerate(result.get("quotes", []), 1):
+        theme = q.get("theme", "").upper()
+        text  = q.get("text", "")
+        lines += [
+            "",
+            f"  {i}.  [ {theme} ]",
+            f'  "{text}"',
+        ]
     export_text = "\n".join(lines)
+
 
     dc1, dc2, dc3 = st.columns(3)
     with dc1:
@@ -299,7 +333,34 @@ def render_results(result: dict):
                            file_name="quote_stream.txt", mime="text/plain")
     with dc2:
         try:
-            pdf = make_pdf("Quote Stream", export_text,
+            # Build rich markdown for PDF so bold/headings render properly
+            md_lines = [
+                f"## Best Quote",
+                f'*"{result.get("best_quote","")}"*',
+                "",
+                f"## YouTube Title",
+                result.get("youtube_title",""),
+                "",
+                f"## Main Takeaway",
+                result.get("main_takeaway",""),
+                "",
+                f"## Reel Caption",
+                result.get("reel_caption",""),
+                "",
+                f"## Hashtags",
+                " ".join(result.get("hashtags",[])),
+                "",
+                "---",
+                "## All Extracted Quotes",
+            ]
+            for i, q in enumerate(result.get("quotes",[]), 1):
+                md_lines += [
+                    "",
+                    f"### {i}. {q.get('theme','')}",
+                    f'*"{q.get("text","")}"*',
+                ]
+            pdf_content = "\n".join(md_lines)
+            pdf = make_pdf("Quote Stream", pdf_content,
                            speaker=result.get("speaker",""),
                            topic=result.get("topic",""),
                            scripture=result.get("scripture",""))
@@ -409,9 +470,10 @@ with tab_file:
         transcript_text = uploaded.read().decode("utf-8", errors="ignore")
         st.success(f"✅ Loaded: {uploaded.name} ({len(transcript_text):,} characters)")
 
-# ── Step 2 — Options (for text/file tabs) ─────────────────────────────────────
+# ── Step 2 — Options ─────────────────────────────────────────────────────────
 st.markdown("<br/>", unsafe_allow_html=True)
-st.markdown("<div class='step-label'>Step 2 — Speaker & Scripture (optional)</div>", unsafe_allow_html=True)
+st.markdown("<div class='step-label'>Step 2 — Speaker, Scripture & Focus Keywords (optional)</div>", unsafe_allow_html=True)
+
 o1, o2 = st.columns(2)
 with o1:
     speaker_hint  = st.text_input("🎙️ Speaker name", key="qs_spk",
@@ -419,6 +481,20 @@ with o1:
 with o2:
     scripture_hint = st.text_input("📚 Scripture / Text", key="qs_scr",
                                     placeholder="e.g. Bhagavad Gītā Ch.15")
+
+st.markdown(
+    "<div style='font-size:0.82rem;color:#888;margin:0.4rem 0 0.3rem;'>"
+    "🔍 <b style='color:#b8a88a;'>Focus Keywords</b> — Enter specific themes, concepts, or "
+    "Sanskrit terms you want the AI to prioritize when extracting quotes. "
+    "Leave blank to extract the most impactful quotes overall.</div>",
+    unsafe_allow_html=True
+)
+keyword_hints = st.text_input(
+    "Focus keywords (optional)",
+    key="qs_keywords",
+    placeholder="e.g. surrender, ego, Ātman, devotion, karma, instrument of God",
+    label_visibility="collapsed"
+)
 
 # ── Step 3 — Extract ──────────────────────────────────────────────────────────
 st.markdown("<br/>", unsafe_allow_html=True)
@@ -430,6 +506,10 @@ if st.button("🌊 Extract Quotes", key="qs_process", use_container_width=True):
         hints = []
         if speaker_hint:   hints.append(f"Speaker: {speaker_hint}")
         if scripture_hint: hints.append(f"Scripture: {scripture_hint}")
+        if keyword_hints:  hints.append(
+            f"PRIORITY FOCUS: When selecting quotes, prioritize teachings related to these "
+            f"themes/keywords: {keyword_hints}. Still extract verbatim — do not paraphrase."
+        )
         if hints:
             full_input = "\n".join(hints) + "\n\n" + transcript_text
         with st.spinner("Streaming wisdom from the discourse…"):
@@ -451,4 +531,3 @@ if "qs_result" in st.session_state:
         for k in ["qs_result", "qs_transcript"]:
             st.session_state.pop(k, None)
         st.rerun()
-
