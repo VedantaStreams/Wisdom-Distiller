@@ -97,7 +97,7 @@ listeners revisit, reflect upon, organize, and internalize the wisdom shared in 
 discourses with greater ease and devotion.</p>
 
 <p style="font-family:'Cormorant Garamond',serif; font-style:italic; color:#888; font-size:0.97rem;">
-I remain deeply grateful to the teachers, seekers, and the
+I remain deeply grateful to my <b style="color:#b8a88a; font-style:normal;">Spiritual Gurus</b>, all my teachers, seekers, and the
 <b style="color:#b8a88a; font-style:normal;">Chinmaya Mission</b> family whose guidance,
 inspiration, and blessings continue to make this humble offering possible.</p>
 
