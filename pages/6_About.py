@@ -68,31 +68,43 @@ st.markdown(f"""
 
 # ── Bio paragraphs ─────────────────────────────────────────────────────────────
 st.markdown("""
-<div style="max-width:680px; margin: 0 auto; font-size:0.95rem; color:#999; line-height:1.85;">
+<div style="max-width:680px; margin: 0 auto; font-size:0.95rem; color:#999; line-height:1.95;">
 
-<p>Suma Rajashankar holds a <b style="color:#b8a88a;">PhD in Physics</b> from the Indian Institute
-of Science and completed postdoctoral research at <b style="color:#b8a88a;">Stony Brook University</b>.
-She served as an <b style="color:#b8a88a;">Assistant Professor</b> at Northern Illinois University,
-teaching across Electrical and Industrial Engineering disciplines for over
-<b style="color:#b8a88a;">18 years</b>.</p>
+<p>My name is <b style="color:#b8a88a;">Suma Rajashankar</b>, and above all, I consider myself
+a sincere student and humble seeker of Vedānta. The timeless wisdom of the scriptures and the
+guidance of revered teachers continue to shape my life with gratitude, reflection, and devotion.</p>
 
-<p>Wishing to broaden her horizons and gain experience beyond academia, she transitioned into the
-<b style="color:#b8a88a;">corporate world</b> — bringing her deep academic foundation into the field
-of <b style="color:#b8a88a;">AI and Data Science</b>. She has since contributed to impactful work at
-<b style="color:#b8a88a;">Discover Financial Services</b> and currently at
-<b style="color:#b8a88a;">Capital One</b>, spanning Generative AI, Speech Recognition, and
-Responsible AI — including the development of guardrails for enterprise-scale AI engineering
-platforms.</p>
+<p>By profession, I work in the field of <b style="color:#b8a88a;">AI and Data Science</b>,
+currently serving as a
+<b style="color:#b8a88a;">Senior Data Scientist / AI Engineer</b> at
+<a href="https://www.capitalone.com" target="_blank"
+   style="color:#c9a96e; text-decoration:none; border-bottom:1px dashed #c9a96e;">Capital One</a>.
+Over the years, I have also been blessed with opportunities to teach, mentor, and work across
+academia and industry. Yet beyond all professional roles and accomplishments, it is the study
+of Vedānta and the sacred <b style="color:#b8a88a;">Guru–Śiṣya Paramparā</b> that I hold
+closest to my heart.</p>
 
-<p>She considers herself a <b style="color:#b8a88a;">humble and earnest seeker on the spiritual
-path</b>, and a <b style="color:#b8a88a;">devoted student of Vedanta</b>, blessed to be closely
-associated with the <b style="color:#b8a88a;">Chinmaya Mission</b>. Through study groups,
-satsangs, and the systematic study of the Upanishads, the Bhagavad Gita, and the Prakarana
-Granthas, this remains a personal journey of reflection, gratitude, and grace.</p>
+<p>Through satsangs, scriptural study, contemplation, and the grace of the Guru, I continue
+this lifelong journey of learning through the
+<b style="color:#b8a88a;">Upaniṣads</b>,
+<b style="color:#b8a88a;">Bhagavad Gītā</b>, and
+<b style="color:#b8a88a;">Prakaraṇa Granthas</b>. This humble initiative was born from a
+heartfelt desire to support fellow seekers in engaging more deeply with these invaluable
+teachings through modern tools and technology.</p>
 
-<p>She also guides working professionals through <b style="color:#b8a88a;">AIML and AIDL programs</b>
-in collaboration with the <b style="color:#b8a88a;">University of Texas at Austin</b> and
-<b style="color:#b8a88a;">Great Learning</b> — a small way of giving back.</p>
+<p>The purpose of this app is to assist seekers in
+<b style="color:#b8a88a;">transcribing discourses</b>,
+generating summaries in multiple formats for reflection and note-taking,
+<b style="color:#b8a88a;">extracting meaningful quotes and insights</b>, and making these
+teachings more accessible across different languages. It is offered as a small
+<b style="color:#b8a88a;font-style:italic;">seva</b> — with the hope that it may help
+listeners revisit, reflect upon, organize, and internalize the wisdom shared in these
+sacred discourses with greater ease and devotion.</p>
+
+<p style="font-family:'Cormorant Garamond',serif; font-style:italic; color:#888; font-size:0.97rem;">
+I remain deeply grateful to the teachers, seekers, and the
+<b style="color:#b8a88a;font-style:normal;">Chinmaya Mission</b> family whose guidance,
+inspiration, and blessings continue to make this humble offering possible.</p>
 
 </div>
 <hr style="border-color:#1e1e1e; margin: 1.5rem auto; max-width:680px;"/>
