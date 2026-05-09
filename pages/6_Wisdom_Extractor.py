@@ -154,25 +154,18 @@ OUTPUT — STRICT JSON ONLY, no markdown fences, no preamble, no explanation
 
 
 def call_extractor(transcript: str, anthropic_key: str) -> dict:
-    import urllib.request
-    payload = json.dumps({
-        "model": "claude-sonnet-4-20250514",
-        "max_tokens": 4000,
-        "system": EXTRACTOR_PROMPT,
-        "messages": [{"role": "user", "content": f"Discourse transcript:\n\n{transcript}"}]
-    }).encode()
-    req = urllib.request.Request(
-        "https://api.anthropic.com/v1/messages",
-        data=payload,
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": anthropic_key,
-            "anthropic-version": "2023-06-01"
-        }
-    )
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        data = json.loads(resp.read())
-    raw = data["content"][0]["text"].strip()
+    import anthropic as _anthropic
+    client = _anthropic.Anthropic(api_key=anthropic_key)
+    raw = ""
+    with client.messages.stream(
+        model="claude-sonnet-4-20250514",
+        max_tokens=4000,
+        system=EXTRACTOR_PROMPT,
+        messages=[{"role": "user", "content": f"Discourse transcript:\n\n{transcript}"}]
+    ) as stream:
+        for text in stream.text_stream:
+            raw += text
+    raw = raw.strip()
 
     # Strategy 1: strip markdown fences
     raw = re.sub(r"^```json\s*", "", raw)
@@ -571,3 +564,4 @@ if "qs_result" in st.session_state:
         for k in ["qs_result", "qs_transcript"]:
             st.session_state.pop(k, None)
         st.rerun()
+
