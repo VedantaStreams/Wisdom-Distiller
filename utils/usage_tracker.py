@@ -10,28 +10,17 @@ import uuid
 import streamlit as st
 from pathlib import Path
 
-USAGE_FILE = Path(__file__).parent.parent / "usage_data.json"
 FREE_USES = 5
 
 
 def _load_data() -> dict:
-    """Load usage data from file."""
-    try:
-        if USAGE_FILE.exists():
-            with open(USAGE_FILE, "r") as f:
-                return json.load(f)
-    except Exception:
-        pass
-    return {}
+    """Load usage data from session state (filesystem is read-only on Streamlit Cloud)."""
+    return st.session_state.get("_usage_data", {})
 
 
 def _save_data(data: dict):
-    """Save usage data to file."""
-    try:
-        with open(USAGE_FILE, "w") as f:
-            json.dump(data, f)
-    except Exception:
-        pass
+    """Save usage data to session state."""
+    st.session_state["_usage_data"] = data
 
 
 def get_user_id() -> str:
