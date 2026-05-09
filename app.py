@@ -317,35 +317,15 @@ st.markdown(
 
 # ── Live visitor + session counter ────────────────────────────────────────────
 try:
-    import json
-    from datetime import datetime
-
-    counter_file = Path(__file__).parent / "usage_data.json"
-    visitors_file = Path(__file__).parent / "visitor_log.json"
-
-    # Count unique users from usage_data
-    total_users = 0
-    total_sessions = 0
-    if counter_file.exists():
-        data = json.loads(counter_file.read_text())
-        total_users = len(data)
-        total_sessions = sum(data.values())
-
-    # Track page visitors (new visit = new session_state)
+    # Visitor counter — session_state only (filesystem read-only on Streamlit Cloud)
     if "page_visit_counted" not in st.session_state:
         st.session_state["page_visit_counted"] = True
-        visit_data = {}
-        if visitors_file.exists():
-            visit_data = json.loads(visitors_file.read_text())
-        today = datetime.now().strftime("%Y-%m-%d")
-        visit_data[today] = visit_data.get(today, 0) + 1
-        visitors_file.write_text(json.dumps(visit_data))
+        count = st.session_state.get("_visit_count", 0) + 1
+        st.session_state["_visit_count"] = count
 
-    # Count total page visits
-    total_visits = 0
-    if visitors_file.exists():
-        visit_data = json.loads(visitors_file.read_text())
-        total_visits = sum(visit_data.values())
+    total_visits  = st.session_state.get("_visit_count", 1)
+    total_users   = 0
+    total_sessions = 0
 
     st.markdown(
         "<div style='text-align:center; padding:1rem 0 0.5rem;'>"
@@ -409,4 +389,5 @@ st.markdown(
     "</div></div>",
     unsafe_allow_html=True
 )
+
 
