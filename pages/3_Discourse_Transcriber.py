@@ -166,37 +166,31 @@ Now transform the following raw transcript:
 """
 
 
-def _claude_call(system: str, user: str, anthropic_key: str, max_tokens: int = 8000) -> str:
-    """Single Claude API call."""
-    import urllib.request
-    payload = json.dumps({
-        "model": "claude-sonnet-4-20250514",
-        "max_tokens": max_tokens,
-        "system": system,
-        "messages": [{"role": "user", "content": user}]
-    }).encode()
-    req = urllib.request.Request(
-        "https://api.anthropic.com/v1/messages",
-        data=payload,
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": anthropic_key,
-            "anthropic-version": "2023-06-01"
-        }
-    )
-    with urllib.request.urlopen(req, timeout=300) as resp:
-        data = json.loads(resp.read())
-    return data["content"][0]["text"].strip()
+def _claude_call(system: str, user: str, anthropic_key: str, max_tokens: int = 4000) -> str:
+    """Single Claude API call using anthropic SDK with streaming to avoid timeouts."""
+    import anthropic as _anthropic
+    client = _anthropic.Anthropic(api_key=anthropic_key)
+    # Use streaming so the connection stays alive and doesn't timeout
+    result_text = ""
+    with client.messages.stream(
+        model="claude-sonnet-4-20250514",
+        max_tokens=max_tokens,
+        system=system,
+        messages=[{"role": "user", "content": user}]
+    ) as stream:
+        for text in stream.text_stream:
+            result_text += text
+    return result_text.strip()
 
 
 def call_structuring_api(raw_transcript: str, prompt: str, anthropic_key: str) -> str:
     """Structure transcript. Splits into chunks if very long (>12000 chars)."""
-    CHUNK_SIZE = 12000   # characters per chunk (~3000 words)
+    CHUNK_SIZE = 8000    # characters per chunk (~2000 words) — keeps each call under 60s
     OVERLAP    = 300     # overlap to avoid losing context at boundaries
 
     if len(raw_transcript) <= CHUNK_SIZE:
         # Short enough — process in one call
-        return _claude_call(prompt, raw_transcript, anthropic_key, max_tokens=8000)
+        return _claude_call(prompt, raw_transcript, anthropic_key, max_tokens=4000)
 
     # Long discourse — chunk it, structure each part, then merge
     chunks = []
@@ -227,7 +221,7 @@ def call_structuring_api(raw_transcript: str, prompt: str, anthropic_key: str) -
             f"Practical Reflection, Main Philosophical Insights) "
             f"based on the ENTIRE discourse, not just this final chunk."
         )
-        part_result = _claude_call(part_prompt, chunk, anthropic_key, max_tokens=8000)
+        part_result = _claude_call(part_prompt, chunk, anthropic_key, max_tokens=4000)
         structured_parts.append(f"\n\n---\n\n" + part_result if i > 1 else part_result)
 
     return "\n".join(structured_parts)
@@ -611,3 +605,4 @@ if "dt_structured" in st.session_state:
         for k in ["dt_structured", "dt_raw", "dt_meta"]:
             st.session_state.pop(k, None)
         st.rerun()
+
