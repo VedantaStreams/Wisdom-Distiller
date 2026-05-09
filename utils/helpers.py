@@ -804,7 +804,8 @@ def _make_pdf_reportlab(title: str, content: str,
     return buffer.getvalue()
 
 
-def make_docx(title: str, content: str) -> bytes:
+def make_docx(title: str, content: str, speaker: str = "", topic: str = "",
+              scripture: str = "", language: str = "", **kwargs) -> bytes:
     """Generate a DOCX from text content. Renders markdown tables as real Word tables."""
     from docx import Document
     from docx.shared import Pt, RGBColor, Cm
@@ -993,4 +994,3 @@ TABLE_CSS = (
     "table td:last-child, table th:last-child { border-right: none; }"
     "</style>"
 )
-
