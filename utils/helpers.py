@@ -224,6 +224,16 @@ TRANSLITERATION_NOTE = (
 )
 
 STYLE_PROMPTS = {
+    "Full structured transcript": (
+        TRANSLITERATION_NOTE
+        + "Transform this raw transcript into a beautifully structured, polished document. "
+        + "Include EVERY sentence — do NOT summarize or skip anything. "
+        + "Organize into sections with ## headings (Introduction, Main Teaching, "
+        + "Key Vedantic Insight, Scriptural Explanation, Story/Analogy, etc.). "
+        + "Fix grammar and remove filler words but preserve all content and meaning. "
+        + "Sanskrit verses MUST appear in Devanāgarī script only. "
+        + "End with: ## Summary | ## Key Takeaways | ## Sanskrit Terms Glossary | ## Practical Reflection"
+    ),
     "Bullet highlights": (
         TRANSLITERATION_NOTE
         + "Summarize the following discourse as clear bullet points grouped "
