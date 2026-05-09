@@ -415,29 +415,31 @@ if st.button("📜 Transcribe & Structure", key="dt_process", use_container_widt
             st.error(f"Transcription failed: {e}")
             st.stop()
 
-        # Step B — Structure with Claude (chunk by chunk with progress updates)
+        # Step B — Structure with Claude using anthropic SDK (same as Audio Summarizer)
         status.markdown("✨ Structuring transcript…")
         try:
-            prompt = build_structuring_prompt(
+            import anthropic as _anthropic
+            client = _anthropic.Anthropic(api_key=anthropic_key)
+
+            sys_prompt = build_structuring_prompt(
                 speaker, topic, scripture, chapter, verse_range, output_lang
             )
             if mode == "📋 Summary only":
-                prompt += (
+                sys_prompt += (
                     "\n\nIMPORTANT: Generate ONLY: Concise Summary, Key Takeaways, "
                     "Sanskrit Terms Glossary, Practical Reflection, and Main Philosophical Insights."
                 )
 
-            CHUNK = 4000
-            text = raw_transcript
+            CHUNK = 80000  # chars — anthropic SDK handles long content natively
+            text  = raw_transcript
             parts = []
             total_chunks = max(1, (len(text) + CHUNK - 1) // CHUNK)
-
             pos = 0
             chunk_num = 0
+
             while pos < len(text):
                 chunk_num += 1
                 end = min(pos + CHUNK, len(text))
-                # break at sentence boundary
                 if end < len(text):
                     b = text.rfind(". ", pos, end)
                     if b != -1:
@@ -446,37 +448,31 @@ if st.button("📜 Transcribe & Structure", key="dt_process", use_container_widt
                 pos = end
 
                 if total_chunks > 1:
-                    status.markdown(f"✨ Structuring part {chunk_num} of {total_chunks}…")
+                    status.markdown(
+                        f"✨ Structuring part {chunk_num} of {total_chunks}…"
+                    )
                     progress.progress(50 + int(40 * chunk_num / total_chunks))
 
                 note = ""
                 if total_chunks > 1:
                     if chunk_num < total_chunks:
-                        note = (f"\n\nNOTE: Part {chunk_num}/{total_chunks}. "
-                                f"Structure this portion only. No summary sections yet.")
+                        note = (
+                            f"\n\nNOTE: Part {chunk_num}/{total_chunks}. "
+                            f"Structure this portion fully. No summary sections yet."
+                        )
                     else:
-                        note = (f"\n\nNOTE: Final part {chunk_num}/{total_chunks}. "
-                                f"Structure this AND add full end sections.")
+                        note = (
+                            f"\n\nNOTE: Final part {chunk_num}/{total_chunks}. "
+                            f"Structure this AND add the full end sections."
+                        )
 
-                import urllib.request as _ur
-                payload = json.dumps({
-                    "model": "claude-sonnet-4-20250514",
-                    "max_tokens": 6000,
-                    "system": prompt + note,
-                    "messages": [{"role": "user", "content": chunk}]
-                }).encode()
-                req = _ur.Request(
-                    "https://api.anthropic.com/v1/messages",
-                    data=payload,
-                    headers={
-                        "Content-Type": "application/json",
-                        "x-api-key": anthropic_key,
-                        "anthropic-version": "2023-06-01"
-                    }
+                msg = client.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=8000,
+                    system=sys_prompt + note,
+                    messages=[{"role": "user", "content": chunk}]
                 )
-                with _ur.urlopen(req, timeout=55) as resp:
-                    data = json.loads(resp.read())
-                part = data["content"][0]["text"].strip()
+                part = msg.content[0].text.strip()
                 parts.append(("\n\n---\n\n" + part) if chunk_num > 1 else part)
 
             structured = "\n".join(parts)
@@ -667,5 +663,6 @@ if "dt_structured" in st.session_state:
         for k in ["dt_structured", "dt_raw", "dt_meta"]:
             st.session_state.pop(k, None)
         st.rerun()
+
 
 
