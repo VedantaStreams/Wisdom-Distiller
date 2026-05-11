@@ -77,33 +77,99 @@ with tab_iphone:
         unsafe_allow_html=True
     )
 
-    st.markdown(
-        "<div style='background:#111; border:1px solid #2a2a2a; border-radius:12px;"
-        " padding:1.4rem 1.8rem; margin-bottom:1rem;'>"
-        "<div style='font-size:0.84rem; color:#888; line-height:2.1;'>"
-        "<b style='color:#b8a88a;'>1.</b> Open <b>Safari</b> on your iPhone<br/>"
-        "<b style='color:#b8a88a;'>2.</b> Visit your app URL (e.g. <span style='color:#c9a96e;'>wisdomdistiller.vedantadhara.com</span>)<br/>"
-        "<b style='color:#b8a88a;'>3.</b> Tap the <b>Share button</b> "
-        "(square with arrow, bottom of screen)<br/>"
-        "<b style='color:#b8a88a;'>4.</b> Scroll and tap <b>Add to Home Screen</b><br/>"
-        "<b style='color:#b8a88a;'>5.</b> Tap <b>Add</b> — icon appears on home screen!"
-        "</div></div>",
-        unsafe_allow_html=True
-    )
+    st.markdown("""
+<div style='background:#111;border:1px solid #2a2a2a;border-radius:12px;
+padding:1.4rem 1.8rem;margin-bottom:1rem;'>
 
-    st.markdown(
-        "<div style='background:#111; border:1px solid #2a2a2a;"
-        " border-left:3px solid #c9a96e; border-radius:8px;"
-        " padding:0.8rem 1.2rem; margin-bottom:1.2rem;'>"
-        "<div style='font-size:0.82rem; color:#888; line-height:1.85;'>"
-        "&#x2705; No App Store download needed<br/>"
-        "&#x2705; Looks and feels like a native app<br/>"
-        "&#x2705; Free to use (first 5 sessions)<br/>"
-        "&#x2705; Always up to date automatically<br/>"
-        "&#x2705; Works on iPhone and iPad"
-        "</div></div>",
-        unsafe_allow_html=True
-    )
+<div style='font-size:0.7rem;color:#c9a96e;text-transform:uppercase;
+letter-spacing:1px;margin-bottom:1rem;'>📱 Step-by-Step Guide — iPhone & iPad</div>
+
+<div style='display:flex;flex-direction:column;gap:0.9rem;'>
+
+<div style='display:flex;align-items:flex-start;gap:0.8rem;'>
+  <div style='background:#c9a96e;color:#0a0a0a;border-radius:50%;width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;
+  font-weight:700;flex-shrink:0;margin-top:0.1rem;'>1</div>
+  <div style='font-size:0.88rem;color:#999;line-height:1.7;'>
+    <b style='color:#e8e0d4;'>Open Safari</b> on your iPhone or iPad.<br/>
+    <span style='font-size:0.78rem;color:#555;'>⚠️ Must use Safari — Chrome does not support Add to Home Screen on iPhone.</span>
+  </div>
+</div>
+
+<div style='display:flex;align-items:flex-start;gap:0.8rem;'>
+  <div style='background:#c9a96e;color:#0a0a0a;border-radius:50%;width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;
+  font-weight:700;flex-shrink:0;margin-top:0.1rem;'>2</div>
+  <div style='font-size:0.88rem;color:#999;line-height:1.7;'>
+    <b style='color:#e8e0d4;'>Type the URL</b> in the Safari address bar at the top:<br/>
+    <span style='background:#0d0d0d;border:1px solid #2a2a2a;border-radius:6px;
+    padding:4px 12px;color:#c9a96e;font-size:0.85rem;display:inline-block;margin-top:0.3rem;
+    font-family:monospace;letter-spacing:0.3px;'>wisdomdistiller.vedantadhara.com</span>
+  </div>
+</div>
+
+<div style='display:flex;align-items:flex-start;gap:0.8rem;'>
+  <div style='background:#c9a96e;color:#0a0a0a;border-radius:50%;width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;
+  font-weight:700;flex-shrink:0;margin-top:0.1rem;'>3</div>
+  <div style='font-size:0.88rem;color:#999;line-height:1.7;'>
+    <b style='color:#e8e0d4;'>Tap the Share button</b> — the square icon with an arrow
+    pointing upward, located at the <b style='color:#b8a88a;'>bottom centre</b> of
+    the Safari screen.<br/>
+    <span style='font-size:0.78rem;color:#555;'>It looks like this: ⬆ (a box with an arrow going up)</span>
+  </div>
+</div>
+
+<div style='display:flex;align-items:flex-start;gap:0.8rem;'>
+  <div style='background:#c9a96e;color:#0a0a0a;border-radius:50%;width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;
+  font-weight:700;flex-shrink:0;margin-top:0.1rem;'>4</div>
+  <div style='font-size:0.88rem;color:#999;line-height:1.7;'>
+    A menu slides up from the bottom. <b style='color:#e8e0d4;'>Scroll down</b>
+    through the options until you see<br/>
+    <span style='background:#0d0d0d;border:1px solid #2a2a2a;border-radius:6px;
+    padding:4px 12px;color:#e8e0d4;font-size:0.85rem;display:inline-block;margin-top:0.3rem;'>
+    ➕ &nbsp; Add to Home Screen</span>
+  </div>
+</div>
+
+<div style='display:flex;align-items:flex-start;gap:0.8rem;'>
+  <div style='background:#c9a96e;color:#0a0a0a;border-radius:50%;width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;
+  font-weight:700;flex-shrink:0;margin-top:0.1rem;'>5</div>
+  <div style='font-size:0.88rem;color:#999;line-height:1.7;'>
+    A screen appears showing the app name. You can rename it if you like
+    (e.g. <i style='color:#b8a88a;'>Wisdom Distiller</i>) or keep the default.<br/>
+    Tap <b style='color:#e8e0d4;'>Add</b> in the top right corner.
+  </div>
+</div>
+
+<div style='display:flex;align-items:flex-start;gap:0.8rem;'>
+  <div style='background:#a8c88f;color:#0a0a0a;border-radius:50%;width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;font-size:0.8rem;
+  font-weight:700;flex-shrink:0;margin-top:0.1rem;'>✓</div>
+  <div style='font-size:0.88rem;color:#999;line-height:1.7;'>
+    <b style='color:#a8c88f;'>Done!</b> The Wisdom Distiller icon now appears on
+    your iPhone home screen. Tap it anytime to open the app — just like a
+    native app, with no App Store download needed.
+  </div>
+</div>
+
+</div>
+</div>
+""", unsafe_allow_html=True)
+
+    st.markdown("""
+<div style='background:#111;border:1px solid #2a2a2a;border-left:3px solid #c9a96e;
+border-radius:8px;padding:0.8rem 1.2rem;margin-bottom:1.2rem;'>
+<div style='font-size:0.82rem;color:#888;line-height:1.85;'>
+✅ <b style='color:#b8a88a;'>No App Store download</b> — works instantly in Safari<br/>
+✅ <b style='color:#b8a88a;'>Looks like a native app</b> — opens full screen, no browser bar<br/>
+✅ <b style='color:#b8a88a;'>Always up to date</b> — updates automatically, no manual updates<br/>
+✅ <b style='color:#b8a88a;'>Works on iPhone and iPad</b> — any screen size<br/>
+✅ <b style='color:#b8a88a;'>Free to access</b> — just bring your own API keys
+</div></div>
+""", unsafe_allow_html=True)
 
     st.markdown(
         "<div style='font-family:Cormorant Garamond,serif; font-size:1.05rem;"
@@ -569,3 +635,4 @@ with tab_share:
         "</div></div>",
         unsafe_allow_html=True
     )
+
