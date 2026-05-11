@@ -126,7 +126,7 @@ inspiration, and blessings continue to make this humble offering possible.</p>
 c1, c2, c3 = st.columns(3)
 for col, num, label in [
     (c1, "350+", "Professionals Mentored"),
-    (c2, "400+", "Hours of AI/ML Instruction"),
+    (c2, "300+", "Hours of AI/ML Instruction"),
     (c3, "4.75–5.0", "Mentor Rating (4 Years)"),
 ]:
     with col:
