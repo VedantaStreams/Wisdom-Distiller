@@ -290,6 +290,14 @@ if tab_debug is not None:
         unsafe_allow_html=True
     )
     if st.button("🔍 Test Google Sheets Connection", key="test_conn"):
+        # Show detected IP
+        try:
+            from utils.usage_tracker import _get_ip
+            detected_ip = _get_ip()
+            st.info(f"🌐 Detected IP/Session ID: `{detected_ip}`")
+        except Exception as e:
+            st.warning(f"IP detection: {e}")
+
         st.markdown("**Checking secrets...**")
         # Check secrets
         if "FEEDBACK_SHEET_ID" in st.secrets:
