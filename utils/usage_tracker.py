@@ -267,4 +267,4 @@ def show_usage_badge():
         remaining = uses_remaining()
         color = "#c9a96e" if remaining > 2 else "#ff6b6b"
         st.markdown(
-            f"<div style='font-size:0.75rem; color:{color}; text-align:right;'>"
+            f"<div style='font-size:0.75rem; color:{color}; text-align:right;'>")
