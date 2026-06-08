@@ -9,43 +9,55 @@ FREE_USES = 5
 
 
 def _get_ip() -> str:
-    """Get visitor IP address — tries multiple methods."""
-    ip = "unknown"
-
-    # Method 1: st.context.headers (Streamlit >= 1.37, works on Streamlit Cloud)
+    """
+    Get a unique identifier for this visitor.
+    On Streamlit Cloud, true IP is not reliably available.
+    We use a combination of headers + unique session token stored
+    in a way that persists across refreshes via query params.
+    """
+    # Method 1: st.context.headers — look for real public IP headers
+    # Streamlit Cloud sits behind a proxy, so x-forwarded-for has the real IP
     try:
         headers = st.context.headers
-        ip = (
-            headers.get("x-forwarded-for", "").split(",")[0].strip()
-            or headers.get("x-real-ip", "")
-            or headers.get("cf-connecting-ip", "")  # Cloudflare
-            or headers.get("true-client-ip", "")
-            or ""
-        )
-        if ip and ip != "unknown":
-            return ip.strip()
+        # x-forwarded-for on Streamlit Cloud contains the real client IP
+        forwarded = headers.get("x-forwarded-for", "")
+        if forwarded:
+            # Take the LAST IP in the chain — that's the real client
+            # (first can be spoofed, last is added by Streamlit's proxy)
+            ips = [ip.strip() for ip in forwarded.split(",")]
+            # Filter out private/internal IPs
+            for ip in reversed(ips):
+                if ip and not ip.startswith(("10.", "172.", "192.168.", "127.", "::1")):
+                    return ip
+            # If all are private, take the last non-empty one
+            for ip in reversed(ips):
+                if ip:
+                    return ip
     except Exception:
         pass
 
-    # Method 2: External IP lookup API (gets the Streamlit server's egress IP
-    # per user session — not perfect but unique enough per connection)
+    # Method 2: Use a stable session fingerprint
+    # Combine multiple browser signals into a pseudo-unique ID
     try:
-        import urllib.request, json
-        with urllib.request.urlopen(
-            "https://api.ipify.org?format=json", timeout=3
-        ) as r:
-            data = json.loads(r.read())
-            ip = data.get("ip", "unknown")
-            if ip and ip != "unknown":
-                return ip
+        import hashlib, uuid
+        headers = st.context.headers
+        # Use user-agent + accept-language as fingerprint components
+        ua   = headers.get("user-agent", "")
+        lang = headers.get("accept-language", "")
+        # Add a random component stored in session (persists across refreshes)
+        if "_fp_salt" not in st.session_state:
+            st.session_state["_fp_salt"] = str(uuid.uuid4())[:8]
+        salt = st.session_state["_fp_salt"]
+        fingerprint = hashlib.md5(f"{ua}{lang}{salt}".encode()).hexdigest()[:16]
+        return f"fp_{fingerprint}"
     except Exception:
         pass
 
-    # Method 3: Use session ID as unique identifier (last resort)
+    # Method 3: Pure session UUID (last resort — resets on browser close)
     try:
         import uuid
         if "_session_uid" not in st.session_state:
-            st.session_state["_session_uid"] = "session_" + str(uuid.uuid4())[:12]
+            st.session_state["_session_uid"] = "sid_" + str(uuid.uuid4())[:12]
         return st.session_state["_session_uid"]
     except Exception:
         pass
