@@ -331,22 +331,22 @@ if tab_debug is not None:
             if sheet:
                 ws = sheet.worksheet("Submissions")
                 st.success(f"✅ Found Submissions tab with {len(ws.get_all_records())} rows")
-            else:
-                st.error("❌ Could not connect to sheet")
-        except Exception as e:
-            st.error(f"❌ Write test failed: {e}")
 
-# ══════════════════════════════════════════════════════════════════════════════
-# BOTTOM NOTE
-# ══════════════════════════════════════════════════════════════════════════════
-st.markdown("""
-<div style='max-width:600px;margin:2rem auto 0;text-align:center;'>
-    <div style='font-size:0.78rem;color:#444;line-height:1.8;font-style:italic;'>
-    All feedback is reviewed before appearing here.<br/>
-    Your personal details are never shared or stored beyond this app.
-    </div>
-</div>
-<div style="text-align:center; padding: 1.5rem 0 0.5rem;">
-    <div style="font-size:1.1rem; letter-spacing:6px;">🪷 🕉️ 🪷</div>
-</div>
-""", unsafe_allow_html=True)
+                # Check UsageTracker tab
+                try:
+                    ut = sheet.worksheet("UsageTracker")
+                    records = ut.get_all_records()
+                    st.success(f"✅ Found UsageTracker tab with {len(records)} user records")
+                    if records:
+                        st.markdown("**Last 3 entries in UsageTracker:**")
+                        for r in records[-3:]:
+                            st.info(
+                                f"ID: `{r.get('IP','?')}` · "
+                                f"Uses: `{r.get('UseCount','?')}` · "
+                                f"Blocked: `{r.get('Blocked','?')}` · "
+                                f"Last seen: `{r.get('LastSeen','?')}`"
+                            )
+                except Exception:
+                    st.warning(
+                        "⚠️ UsageTracker tab not found yet — "
+                        "it will be created automatically when the first "
