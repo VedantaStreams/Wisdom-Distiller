@@ -10,50 +10,53 @@ FREE_USES = 5
 
 def _get_ip() -> str:
     """
-    Get a unique identifier for this visitor.
-    On Streamlit Cloud, true IP is not reliably available.
-    We use a combination of headers + unique session token stored
-    in a way that persists across refreshes via query params.
+    Get visitor's real public IP by calling ipify.org from the SERVER side.
+    On Streamlit Cloud, each user gets a unique server-side connection,
+    and ipify returns the real client IP via Streamlit's proxy headers.
+    Falls back to browser fingerprint if unavailable.
     """
-    # Method 1: st.context.headers — look for real public IP headers
-    # Streamlit Cloud sits behind a proxy, so x-forwarded-for has the real IP
+    # Cache in session to avoid repeated calls
+    if "_cached_ip" in st.session_state:
+        return st.session_state["_cached_ip"]
+
+    # Method 1: ipify API — most reliable way to get real public IP
+    # Streamlit Cloud passes the real client IP to outbound requests
     try:
-        headers = st.context.headers
-        # x-forwarded-for on Streamlit Cloud contains the real client IP
-        forwarded = headers.get("x-forwarded-for", "")
-        if forwarded:
-            # Take the LAST IP in the chain — that's the real client
-            # (first can be spoofed, last is added by Streamlit's proxy)
-            ips = [ip.strip() for ip in forwarded.split(",")]
-            # Filter out private/internal IPs
-            for ip in reversed(ips):
-                if ip and not ip.startswith(("10.", "172.", "192.168.", "127.", "::1")):
-                    return ip
-            # If all are private, take the last non-empty one
-            for ip in reversed(ips):
-                if ip:
-                    return ip
+        import urllib.request, json
+        req = urllib.request.Request(
+            "https://api64.ipify.org?format=json",
+            headers={"User-Agent": "WisdomDistiller/1.0"}
+        )
+        with urllib.request.urlopen(req, timeout=4) as r:
+            data = json.loads(r.read())
+            ip = data.get("ip", "")
+            if ip and not ip.startswith(
+                ("10.", "172.1", "172.2", "172.3",
+                 "192.168.", "127.", "::1")
+            ):
+                st.session_state["_cached_ip"] = ip
+                return ip
     except Exception:
         pass
 
-    # Method 2: Use a stable session fingerprint
-    # Combine multiple browser signals into a pseudo-unique ID
+    # Method 2: Browser fingerprint — stable within a browser profile
+    # Uses user-agent + language — no random salt so it persists across sessions
     try:
-        import hashlib, uuid
+        import hashlib
         headers = st.context.headers
-        # Use user-agent + accept-language as fingerprint components
-        ua   = headers.get("user-agent", "")
-        lang = headers.get("accept-language", "")
-        # Add a random component stored in session (persists across refreshes)
-        if "_fp_salt" not in st.session_state:
-            st.session_state["_fp_salt"] = str(uuid.uuid4())[:8]
-        salt = st.session_state["_fp_salt"]
-        fingerprint = hashlib.md5(f"{ua}{lang}{salt}".encode()).hexdigest()[:16]
-        return f"fp_{fingerprint}"
+        ua   = headers.get("user-agent", "unknown-ua")
+        lang = headers.get("accept-language", "unknown-lang")
+        # NO random salt — fingerprint is stable for same browser/device
+        fingerprint = hashlib.sha256(
+            (ua + lang).encode()
+        ).hexdigest()[:20]
+        result = "fp_" + fingerprint
+        st.session_state["_cached_ip"] = result
+        return result
     except Exception:
         pass
 
-    # Method 3: Pure session UUID (last resort — resets on browser close)
+    # Method 3: Session UUID (last resort)
     try:
         import uuid
         if "_session_uid" not in st.session_state:
@@ -265,6 +268,3 @@ def show_usage_badge():
         color = "#c9a96e" if remaining > 2 else "#ff6b6b"
         st.markdown(
             f"<div style='font-size:0.75rem; color:{color}; text-align:right;'>"
-            f"🔢 {remaining} of 5 free uses remaining</div>",
-            unsafe_allow_html=True
-        )
