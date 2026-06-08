@@ -282,71 +282,71 @@ with tab_reviews:
 
 # ── Tab 3: Debug ──────────────────────────────────────────────────────────────
 if tab_debug is not None:
- with tab_debug:
-    st.markdown("<br/>", unsafe_allow_html=True)
-    st.markdown(
-        "<div style='font-size:0.85rem;color:#666;margin-bottom:1rem;'>"
-        "Use this tab to test the Google Sheets connection and diagnose any issues.</div>",
-        unsafe_allow_html=True
-    )
-    if st.button("🔍 Test Google Sheets Connection", key="test_conn"):
-        # Show detected IP
-        try:
-            from utils.usage_tracker import _get_ip
-            detected_ip = _get_ip()
-            st.info(f"🌐 Detected IP/Session ID: `{detected_ip}`")
-        except Exception as e:
-            st.warning(f"IP detection: {e}")
+    with tab_debug:
+        st.markdown("<br/>", unsafe_allow_html=True)
+        st.markdown(
+            "<div style='font-size:0.85rem;color:#666;margin-bottom:1rem;'>"
+            "Use this tab to test the Google Sheets connection and diagnose any issues.</div>",
+            unsafe_allow_html=True
+        )
+        if st.button("🔍 Test Google Sheets Connection", key="test_conn"):
+            try:
+                from utils.usage_tracker import _get_ip
+                detected_ip = _get_ip()
+                st.info(f"🌐 Detected IP/Session ID: `{detected_ip}`")
+            except Exception as e:
+                st.warning(f"IP detection: {e}")
 
-        st.markdown("**Checking secrets...**")
-        # Check secrets
-        if "FEEDBACK_SHEET_ID" in st.secrets:
-            st.success(f"✅ FEEDBACK_SHEET_ID found: {st.secrets['FEEDBACK_SHEET_ID'][:20]}...")
-        else:
-            st.error("❌ FEEDBACK_SHEET_ID missing from Streamlit Secrets")
-
-        if "gcp_service_account" in st.secrets:
-            sa = dict(st.secrets["gcp_service_account"])
-            st.success(f"✅ gcp_service_account found")
-            st.info(f"   client_email: {sa.get('client_email','NOT FOUND')}")
-            st.info(f"   project_id: {sa.get('project_id','NOT FOUND')}")
-            pk = sa.get('private_key','')
-            if pk:
-                st.success(f"✅ private_key present ({len(pk)} chars)")
-                if "\n" in pk:
-                    st.warning("⚠️ private_key contains literal \\n — may need fixing")
-                else:
-                    st.success("✅ private_key newlines look correct")
+            st.markdown("**Checking secrets...**")
+            if "FEEDBACK_SHEET_ID" in st.secrets:
+                st.success(f"✅ FEEDBACK_SHEET_ID found: {st.secrets['FEEDBACK_SHEET_ID'][:20]}...")
             else:
-                st.error("❌ private_key is empty")
-        else:
-            st.error("❌ gcp_service_account missing from Streamlit Secrets")
+                st.error("❌ FEEDBACK_SHEET_ID missing from Streamlit Secrets")
 
-        st.markdown("**Testing connection...**")
-        get_sheet(debug=True)
+            if "gcp_service_account" in st.secrets:
+                sa = dict(st.secrets["gcp_service_account"])
+                st.success("✅ gcp_service_account found")
+                st.info(f"   client_email: {sa.get('client_email','NOT FOUND')}")
+                st.info(f"   project_id: {sa.get('project_id','NOT FOUND')}")
+                pk = sa.get("private_key", "")
+                if pk:
+                    st.success(f"✅ private_key present ({len(pk)} chars)")
+                    if "\\n" in pk:
+                        st.warning("⚠️ private_key contains literal \\n — may need fixing")
+                    else:
+                        st.success("✅ private_key newlines look correct")
+                else:
+                    st.error("❌ private_key is empty")
+            else:
+                st.error("❌ gcp_service_account missing from Streamlit Secrets")
 
-        st.markdown("**Testing write...**")
-        try:
-            sheet = get_sheet(debug=False)
-            if sheet:
-                ws = sheet.worksheet("Submissions")
-                st.success(f"✅ Found Submissions tab with {len(ws.get_all_records())} rows")
+            st.markdown("**Testing connection...**")
+            get_sheet(debug=True)
 
-                # Check UsageTracker tab
-                try:
-                    ut = sheet.worksheet("UsageTracker")
-                    records = ut.get_all_records()
-                    st.success(f"✅ Found UsageTracker tab with {len(records)} user records")
-                    if records:
-                        st.markdown("**Last 3 entries in UsageTracker:**")
-                        for r in records[-3:]:
-                            st.info(
-                                f"ID: `{r.get('IP','?')}` · "
-                                f"Uses: `{r.get('UseCount','?')}` · "
-                                f"Blocked: `{r.get('Blocked','?')}` · "
-                                f"Last seen: `{r.get('LastSeen','?')}`"
-                            )
-                except Exception:
-                    st.warning(
-                        "⚠️ UsageTracker tab not found yet — "
-                        "it will be created automatically when the first "
+            st.markdown("**Testing write...**")
+            try:
+                sheet = get_sheet(debug=False)
+                if sheet:
+                    ws = sheet.worksheet("Submissions")
+                    st.success(f"✅ Found Submissions tab with {len(ws.get_all_records())} rows")
+                    try:
+                        ut = sheet.worksheet("UsageTracker")
+                        records = ut.get_all_records()
+                        st.success(f"✅ Found UsageTracker tab with {len(records)} user records")
+                        if records:
+                            st.markdown("**Last 3 entries in UsageTracker:**")
+                            for r in records[-3:]:
+                                st.info(
+                                    f"ID: `{r.get('IP','?')}` · "
+                                    f"Uses: `{r.get('UseCount','?')}` · "
+                                    f"Blocked: `{r.get('Blocked','?')}` · "
+                                    f"Last seen: `{r.get('LastSeen','?')}`"
+                                )
+                    except Exception:
+                        st.warning(
+                            "⚠️ UsageTracker tab not found yet — "
+                            "it will be created automatically when the first "
+                            "visitor uses the app after rebooting."
+                        )
+                else:
+                    st.error("❌ Could not connect to sheet")
