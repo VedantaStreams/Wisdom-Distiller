@@ -18,6 +18,55 @@ st.set_page_config(
 
 st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
+# ── Google Login Required ─────────────────────────────────────────────────────
+def require_login():
+    is_logged_in = False
+    try:
+        user = st.experimental_user
+        is_logged_in = user is not None and bool(getattr(user, "email", None))
+    except Exception:
+        try:
+            user = st.user
+            is_logged_in = user is not None and bool(getattr(user, "email", None))
+        except Exception:
+            pass
+
+    if not is_logged_in:
+        st.markdown("""
+<div style="text-align:center; padding:3rem 1rem;">
+    <div style="font-size:3rem; margin-bottom:1rem;">🕉️</div>
+    <div style="font-family:'Cormorant Garamond',serif; font-size:2.2rem;
+    font-weight:600; color:#e8e0d4; margin-bottom:0.5rem;">
+        Wisdom <span style="color:#c9a96e;">Distiller</span>
+    </div>
+    <div style="font-size:0.9rem; color:#555; margin-bottom:2rem;">
+        Śravaṇa · Manana · Nididhyāsana
+    </div>
+    <div style="background:#111; border:1px solid #2a2a2a;
+    border-left:3px solid #c9a96e; border-radius:12px;
+    padding:1.5rem 2rem; max-width:420px; margin:0 auto 1.5rem;">
+        <div style="font-size:0.92rem; color:#888; line-height:1.9;">
+            Please sign in with your Google account to access
+            <b style="color:#b8a88a;">Wisdom Distiller</b>.<br/><br/>
+            New visitors receive <b style="color:#c9a96e;">5 free sessions</b>.
+            After that, simply enter your own API keys to continue
+            with unlimited access at minimal cost.
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col2:
+            if st.button("🔑  Sign in with Google",
+                         use_container_width=True, key="login_btn"):
+                try:
+                    st.login("google")
+                except Exception as e:
+                    st.error("Login error: " + str(e))
+        st.stop()
+
+require_login()
+
 # ── iPhone home screen icon ────────────────────────────────────────────────────
 
 
@@ -94,6 +143,23 @@ with st.sidebar:
     except Exception:
         pass
     st.markdown("<hr style='border-color:#1e1e1e; margin:0.3rem 0 0.8rem;'/>", unsafe_allow_html=True)
+    # Show logged-in user
+    try:
+        user = st.experimental_user
+        email = getattr(user, "email", "") or ""
+        name  = getattr(user, "name", "") or email.split("@")[0]
+        if email:
+            st.markdown(
+                "<div style='font-size:0.72rem;color:#555;margin-bottom:0.3rem;'>"
+                "Signed in as</div>"
+                "<div style='font-size:0.78rem;color:#b8a88a;margin-bottom:0.5rem;'>"
+                + name + "</div>",
+                unsafe_allow_html=True
+            )
+            if st.button("Sign out", key="signout_btn"):
+                st.logout()
+    except Exception:
+        pass
 
     st.markdown(
         f'<div style="text-align:center; padding:0.8rem 0 0.4rem;">'
@@ -318,8 +384,12 @@ nav_card(col6, "❓", "FAQ",
 st.markdown("<br/>", unsafe_allow_html=True)
 
 # ── Row 3: Community ──────────────────────────────────────────────────────────
-_, col7, _ = st.columns([1, 1, 1])
-nav_card(col7, "🌟", "Feedback & Reviews",
+col7, col8 = st.columns(2)
+nav_card(col7, "🎭", "Story Script Generator",
+         "Turn discourses into plays · Skits · Balavihar",
+         "🎭 Open Script Generator", "btn_script",
+         "pages/12_Story_Script.py")
+nav_card(col8, "🌟", "Feedback & Reviews",
          "Share your experience · Read what others say",
          "🌟 Share Feedback", "btn_feedback",
          "pages/11_Feedback.py")
