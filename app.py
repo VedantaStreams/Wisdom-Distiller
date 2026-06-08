@@ -21,13 +21,29 @@ st.markdown(SHARED_CSS, unsafe_allow_html=True)
 # ── Google Login Required ─────────────────────────────────────────────────────
 def require_login():
     is_logged_in = False
+    email = ""
     try:
         user = st.experimental_user
-        is_logged_in = user is not None and bool(getattr(user, "email", None))
+        email = getattr(user, "email", "") or ""
+        is_logged_in = bool(email)
     except Exception:
+        pass
+
+    if not is_logged_in:
         try:
             user = st.user
-            is_logged_in = user is not None and bool(getattr(user, "email", None))
+            email = getattr(user, "email", "") or ""
+            is_logged_in = bool(email)
+        except Exception:
+            pass
+
+    if not is_logged_in:
+        # Check if logged in via session state (post-redirect)
+        try:
+            if hasattr(st, "experimental_user"):
+                u = st.experimental_user
+                if u and hasattr(u, "is_logged_in"):
+                    is_logged_in = u.is_logged_in
         except Exception:
             pass
 
