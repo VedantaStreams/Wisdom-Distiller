@@ -24,6 +24,26 @@ from utils.helpers import (
 )
 
 st.markdown(SHARED_CSS, unsafe_allow_html=True)
+# ── Require login ─────────────────────────────────────────────────────────────
+def _check_login():
+    is_logged_in = False
+    try:
+        user = st.experimental_user
+        is_logged_in = user is not None and bool(getattr(user, "email", None))
+    except Exception:
+        try:
+            user = st.user
+            is_logged_in = user is not None and bool(getattr(user, "email", None))
+        except Exception:
+            pass
+    if not is_logged_in:
+        st.warning("Please sign in via the Home page to use this feature.")
+        if st.button("Go to Home page"):
+            st.switch_page("app.py")
+        st.stop()
+_check_login()
+
+
 
 with st.sidebar:
     try:
