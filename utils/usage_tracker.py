@@ -9,19 +9,48 @@ FREE_USES = 5
 
 
 def _get_ip() -> str:
-    """Get visitor IP address from Streamlit headers."""
+    """Get visitor IP address — tries multiple methods."""
+    ip = "unknown"
+
+    # Method 1: st.context.headers (Streamlit >= 1.37, works on Streamlit Cloud)
     try:
         headers = st.context.headers
-        # Check for forwarded IP (behind proxy/CDN)
         ip = (
             headers.get("x-forwarded-for", "").split(",")[0].strip()
             or headers.get("x-real-ip", "")
-            or headers.get("remote-addr", "")
-            or "unknown"
+            or headers.get("cf-connecting-ip", "")  # Cloudflare
+            or headers.get("true-client-ip", "")
+            or ""
         )
-        return ip.strip() or "unknown"
+        if ip and ip != "unknown":
+            return ip.strip()
     except Exception:
-        return "unknown"
+        pass
+
+    # Method 2: External IP lookup API (gets the Streamlit server's egress IP
+    # per user session — not perfect but unique enough per connection)
+    try:
+        import urllib.request, json
+        with urllib.request.urlopen(
+            "https://api.ipify.org?format=json", timeout=3
+        ) as r:
+            data = json.loads(r.read())
+            ip = data.get("ip", "unknown")
+            if ip and ip != "unknown":
+                return ip
+    except Exception:
+        pass
+
+    # Method 3: Use session ID as unique identifier (last resort)
+    try:
+        import uuid
+        if "_session_uid" not in st.session_state:
+            st.session_state["_session_uid"] = "session_" + str(uuid.uuid4())[:12]
+        return st.session_state["_session_uid"]
+    except Exception:
+        pass
+
+    return "unknown"
 
 
 def _get_usage_sheet():
