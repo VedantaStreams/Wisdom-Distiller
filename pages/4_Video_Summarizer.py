@@ -31,6 +31,7 @@ from utils.helpers import (
     TABLE_CSS,
     LANGUAGES
 )
+from utils.focus_prompt import render_focus_prompt
 
 st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
@@ -317,6 +318,9 @@ if audio_ready_path and os.path.exists(audio_ready_path):
     show_transcript = st.checkbox(
         "Show full transcript on page", value=False, key="vid_show_tr"
     )
+
+    # ── Additional Focus / Custom Prompt ──────────────────────────────────────
+    custom_prompt = render_focus_prompt("vid")
     st.markdown("---")
 
     if not anthropic_key or not openai_key:
@@ -346,7 +350,8 @@ if audio_ready_path and os.path.exists(audio_ready_path):
 
             status_text.markdown("**Transcription done! Summarizing with Claude…**")
             summary = summarize_text(
-                transcript, summary_style, selected_columns, anthropic_key
+                transcript, summary_style, selected_columns, anthropic_key,
+                custom_prompt=custom_prompt
             )
             progress_bar.progress(1.0)
             status_text.markdown("✅ **Done!**")
