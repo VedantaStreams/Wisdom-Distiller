@@ -98,7 +98,7 @@ with st.sidebar:
         f'<p style="font-family:Cormorant Garamond,serif; font-size:1.05rem;'
         f' font-weight:600; color:#e8e0d4; margin:0 0 0.15rem;">Suma Rajashankar</p>'
         f'<p style="font-size:0.72rem; color:#c9a96e; letter-spacing:0.4px;'
-        f' text-transform:uppercase; margin:0 0 0.5rem;">Senior Data Scientist / AI Engineer</p>'
+        f' text-transform:uppercase; margin:0 0 0.5rem;">Senior Research Data Scientist / AI Engineer</p>'
         f'<div style="font-size:0.78rem;">'
         f'<a href="Sadhana_and_Seva" target="_self"'
         f' style="color:#c9a96e; text-decoration:none; border-bottom:1px dashed #c9a96e;">'
@@ -338,30 +338,34 @@ nav_card(col3, "🎬", "Video Summarizer",
 
 st.markdown("<br/>", unsafe_allow_html=True)
 
-# ── Row 2: Wisdom & analysis tools ───────────────────────────────────────────
+# ── Row 2 ─────────────────────────────────────────────────────────────────────
 col4, col5, col6 = st.columns(3)
-nav_card(col4, "💎", "Wisdom Extractor",
-         "Verbatim quotes · YouTube · Reels",
-         "💎 Open Wisdom Extractor", "btn_wisdom",
-         "pages/6_Wisdom_Extractor.py")
-nav_card(col5, "📄", "Document Combiner",
+nav_card(col4, "📄", "Document Combiner",
          "Merge multiple transcripts",
          "📄 Open Document Combiner", "btn_doc",
          "pages/5_Document_Combiner.py")
-nav_card(col6, "❓", "FAQ",
-         "Help · Getting started · Troubleshooting",
-         "❓ Open FAQ", "btn_faq",
-         "pages/8_FAQ.py")
+nav_card(col5, "💎", "Wisdom Extractor",
+         "Verbatim quotes · YouTube · Reels",
+         "💎 Open Wisdom Extractor", "btn_wisdom",
+         "pages/6_Wisdom_Extractor.py")
+nav_card(col6, "🕉️", "About the App",
+         "What makes Wisdom Distiller unique",
+         "🕉️ Open About", "btn_about",
+         "pages/7_About.py")
 
 st.markdown("<br/>", unsafe_allow_html=True)
 
-# ── Row 3: Community ──────────────────────────────────────────────────────────
-col7, col8 = st.columns(2)
-nav_card(col7, "🎭", "Story Script Generator",
-         "Turn discourses into plays · Skits · Balavihar",
-         "🎭 Open Script Generator", "btn_script",
-         "pages/12_Story_Script.py")
-nav_card(col8, "🌟", "Feedback & Reviews",
+# ── Row 3 ─────────────────────────────────────────────────────────────────────
+col7, col8, col9 = st.columns(3)
+nav_card(col7, "📱", "Get the App",
+         "Add Wisdom Distiller to your home screen",
+         "📱 Open Get the App", "btn_getapp",
+         "pages/9_Get_the_App.py")
+nav_card(col8, "❓", "FAQ",
+         "Help · Getting started · Troubleshooting",
+         "❓ Open FAQ", "btn_faq",
+         "pages/8_FAQ.py")
+nav_card(col9, "🌟", "Feedback & Reviews",
          "Share your experience · Read what others say",
          "🌟 Share Feedback", "btn_feedback",
          "pages/11_Feedback.py")
