@@ -14,6 +14,7 @@ from utils.helpers import (
     make_pdf, make_docx,
     TABLE_COLUMNS, markdown_table_to_html, TABLE_CSS, LANGUAGES
 )
+from utils.focus_prompt import render_focus_prompt
 
 st.set_page_config(
     page_title="Audio Summarizer · Wisdom Distiller",
@@ -275,6 +276,9 @@ if uploaded_files:
 
     analyze = st.checkbox("🔍 Identify speaker, topic & scripture references", value=True)
     show_transcript = st.checkbox("Show full transcript on page", value=False)
+
+    # ── Additional Focus / Custom Prompt ──────────────────────────────────────
+    custom_prompt = render_focus_prompt("aud")
     st.markdown("---")
 
     if not anthropic_key or not openai_key:
@@ -322,7 +326,8 @@ if uploaded_files:
 
             status_text.markdown("**Summarizing with Claude…**")
             summary = summarize_text(
-                transcript, summary_style, selected_columns, anthropic_key
+                transcript, summary_style, selected_columns, anthropic_key,
+                custom_prompt=custom_prompt
             )
             progress_bar.progress(0.90)
 
