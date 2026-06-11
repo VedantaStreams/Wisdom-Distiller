@@ -18,77 +18,6 @@ st.set_page_config(
 
 st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
-# ── Google Login Handler ─────────────────────────────────────────────────────
-# Using exact pattern from Streamlit docs
-_user_logged_in = False
-_user_email     = ""
-_user_name      = ""
-
-if not st.user.is_logged_in:
-    st.markdown("""
-<div style="text-align:center; padding:2rem 1rem 1rem;">
-    <div style="font-size:3rem; margin-bottom:0.8rem;">🕉️</div>
-    <div style="font-family:'Cormorant Garamond',serif; font-size:2.2rem;
-    font-weight:600; color:#e8e0d4; margin-bottom:0.3rem;">
-        Wisdom <span style="color:#c9a96e;">Distiller</span>
-    </div>
-    <div style="font-size:0.85rem; color:#555; margin-bottom:1.5rem;
-    letter-spacing:1px;">Śravaṇa · Manana · Nididhyāsana</div>
-</div>
-""", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("""
-<div style="background:#111; border:1px solid #2a2a2a;
-border-left:3px solid #c9a96e; border-radius:12px;
-padding:1.5rem 1.8rem; margin-bottom:1.2rem;">
-    <div style="font-size:0.92rem; color:#888; line-height:1.9; text-align:center;">
-        Sign in with Google to access Wisdom Distiller.<br/><br/>
-        <b style="color:#c9a96e;">New visitors get 5 free sessions.</b><br/>
-        After that, enter your own Anthropic and OpenAI API keys
-        to continue with unlimited access at minimal cost.
-    </div>
-</div>
-""", unsafe_allow_html=True)
-        st.button("🔑  Sign in with Google",
-                  on_click=st.login, args=["google"],
-                  use_container_width=True)
-
-        # ── Diagnostic (temporary) ────────────────────────────────────
-        with st.expander("🔍 Login diagnostic"):
-            try:
-                st.write("st.user object:")
-                st.json(st.user.to_dict())
-            except Exception as ex1:
-                try:
-                    st.write("is_logged_in:", st.user.is_logged_in)
-                except Exception as ex2:
-                    st.write("Error reading st.user:", str(ex1), str(ex2))
-            try:
-                import streamlit as _st_mod
-                st.write("Streamlit version:", _st_mod.__version__)
-            except Exception:
-                pass
-            try:
-                import authlib
-                st.write("Authlib version:", authlib.__version__)
-            except Exception as ex:
-                st.write("Authlib NOT installed:", str(ex))
-            st.write("auth in secrets:", "auth" in st.secrets)
-            if "auth" in st.secrets:
-                auth_keys = list(dict(st.secrets["auth"]).keys())
-                st.write("auth keys:", auth_keys)
-    st.stop()
-
-_user_logged_in = True
-_user_email = (st.user.email or "").lower().strip()
-_user_name  = (st.user.name or "").strip()
-if not _user_name and _user_email:
-    _user_name = _user_email.split("@")[0]
-
-# ── iPhone home screen icon ────────────────────────────────────────────────────
-
-
 # Nav card button styling
 st.markdown("""
 <style>
@@ -162,23 +91,6 @@ with st.sidebar:
     except Exception:
         pass
     st.markdown("<hr style='border-color:#1e1e1e; margin:0.3rem 0 0.8rem;'/>", unsafe_allow_html=True)
-    # Show logged-in user
-    try:
-        user = st.experimental_user
-        email = getattr(user, "email", "") or ""
-        name  = getattr(user, "name", "") or email.split("@")[0]
-        if email:
-            st.markdown(
-                "<div style='font-size:0.72rem;color:#555;margin-bottom:0.3rem;'>"
-                "Signed in as</div>"
-                "<div style='font-size:0.78rem;color:#b8a88a;margin-bottom:0.5rem;'>"
-                + name + "</div>",
-                unsafe_allow_html=True
-            )
-            if st.button("Sign out", key="signout_btn"):
-                st.logout()
-    except Exception:
-        pass
 
     st.markdown(
         f'<div style="text-align:center; padding:0.8rem 0 0.4rem;">'
@@ -194,21 +106,6 @@ with st.sidebar:
         f'<hr style="border-color:#1e1e1e; margin:0.8rem 0;"/>',
         unsafe_allow_html=True
     )
-    # Show signed-in user + sign out button
-    if _user_email:
-        st.markdown(
-            "<div style='font-size:0.72rem;color:#555;margin-bottom:0.1rem;'>"
-            "Signed in as</div>"
-            "<div style='font-size:0.78rem;color:#b8a88a;margin-bottom:0.4rem;'>"
-            + (_user_name or _user_email) + "</div>",
-            unsafe_allow_html=True
-        )
-        if st.button("Sign out", key="signout_btn"):
-            st.logout()
-        st.markdown(
-            "<hr style='border-color:#1e1e1e; margin:0.4rem 0 0.6rem;'/>",
-            unsafe_allow_html=True
-        )
 
     # ── API Keys ──────────────────────────────────────────────────────────────
     # Check if keys are pre-loaded via Streamlit Secrets (owner's deployment)
@@ -226,14 +123,28 @@ with st.sidebar:
         # No pre-configured keys — show friendly guided input
         st.markdown("### ⚙️ Enter Your API Keys")
         st.markdown(
-            "<div style='background:#111;border:1px solid #2a2a2a;border-left:3px solid #c9a96e;"            "border-radius:8px;padding:0.8rem 1rem;margin-bottom:0.8rem;font-size:0.78rem;color:#888;line-height:1.7;'>"            "<b style='color:#c9a96e;'>First time?</b> This app needs two free API keys to work.<br/>"            "Your keys are <b style='color:#b8a88a;'>never stored</b> — they are only used "            "for your current session and cleared when you close the browser."            "</div>",
+            "<div style='background:#111;border:1px solid #2a2a2a;border-left:3px solid #c9a96e;"
+            "border-radius:8px;padding:0.8rem 1rem;margin-bottom:0.8rem;font-size:0.78rem;color:#888;line-height:1.7;'>"
+            "<b style='color:#c9a96e;'>This app runs on your own API keys.</b><br/>"
+            "You will need two keys (a few minutes to set up, pay-as-you-go, "
+            "typically just a few cents per discourse).<br/>"
+            "Your keys are <b style='color:#b8a88a;'>never stored</b> — they are only used "
+            "for your current session and cleared when you close the browser."
+            "</div>",
             unsafe_allow_html=True
         )
 
         # ── Anthropic key ──────────────────────────────────────────────────
         with st.expander("🔑 Step 1 — Get your Anthropic (Claude) key", expanded=False):
             st.markdown(
-                "<div style='font-size:0.78rem;color:#888;line-height:1.8;'>"                "1. Go to <a href='https://console.anthropic.com' target='_blank' "                "style='color:#c9a96e;'>console.anthropic.com</a><br/>"                "2. Sign up for a free account<br/>"                "3. Click <b style='color:#b8a88a;'>API Keys</b> in the left menu<br/>"                "4. Click <b style='color:#b8a88a;'>Create Key</b> and copy it<br/>"                "5. Paste it in the box below"                "</div>",
+                "<div style='font-size:0.78rem;color:#888;line-height:1.8;'>"
+                "1. Go to <a href='https://console.anthropic.com' target='_blank' "
+                "style='color:#c9a96e;'>console.anthropic.com</a><br/>"
+                "2. Sign up for a free account<br/>"
+                "3. Click <b style='color:#b8a88a;'>API Keys</b> in the left menu<br/>"
+                "4. Click <b style='color:#b8a88a;'>Create Key</b> and copy it<br/>"
+                "5. Paste it in the box below"
+                "</div>",
                 unsafe_allow_html=True
             )
 
@@ -242,7 +153,7 @@ with st.sidebar:
             type="password",
             placeholder="sk-ant-...",
             value=st.session_state.get("anthropic_key", ""),
-            help="Starts with sk-ant-  |  Get yours free at console.anthropic.com"
+            help="Starts with sk-ant-  |  Get yours at console.anthropic.com"
         )
         if anthropic_key:
             st.success("✅ Anthropic key entered")
@@ -252,7 +163,14 @@ with st.sidebar:
         # ── OpenAI key ─────────────────────────────────────────────────────
         with st.expander("🔑 Step 2 — Get your OpenAI key", expanded=False):
             st.markdown(
-                "<div style='font-size:0.78rem;color:#888;line-height:1.8;'>"                "1. Go to <a href='https://platform.openai.com/api-keys' target='_blank' "                "style='color:#c9a96e;'>platform.openai.com/api-keys</a><br/>"                "2. Sign up or log in<br/>"                "3. Click <b style='color:#b8a88a;'>Create new secret key</b><br/>"                "4. Copy the key shown (you won't see it again!)<br/>"                "5. Paste it in the box below"                "</div>",
+                "<div style='font-size:0.78rem;color:#888;line-height:1.8;'>"
+                "1. Go to <a href='https://platform.openai.com/api-keys' target='_blank' "
+                "style='color:#c9a96e;'>platform.openai.com/api-keys</a><br/>"
+                "2. Sign up or log in<br/>"
+                "3. Click <b style='color:#b8a88a;'>Create new secret key</b><br/>"
+                "4. Copy the key shown (you won't see it again!)<br/>"
+                "5. Paste it in the box below"
+                "</div>",
                 unsafe_allow_html=True
             )
 
@@ -261,7 +179,7 @@ with st.sidebar:
             type="password",
             placeholder="sk-...",
             value=st.session_state.get("openai_key", ""),
-            help="Starts with sk-  |  Get yours free at platform.openai.com"
+            help="Starts with sk-  |  Get yours at platform.openai.com"
         )
         if openai_key:
             st.success("✅ OpenAI key entered")
@@ -270,7 +188,9 @@ with st.sidebar:
 
         if not anthropic_key or not openai_key:
             st.markdown(
-                "<div style='background:#111;border:1px solid #2a2a2a;border-radius:8px;"                "padding:0.6rem 0.8rem;margin-top:0.5rem;font-size:0.75rem;color:#555;"                "text-align:center;'>Both keys needed to use the app</div>",
+                "<div style='background:#111;border:1px solid #2a2a2a;border-radius:8px;"
+                "padding:0.6rem 0.8rem;margin-top:0.5rem;font-size:0.75rem;color:#555;"
+                "text-align:center;'>Both keys needed to use the app</div>",
                 unsafe_allow_html=True
             )
 
@@ -346,6 +266,24 @@ st.markdown(
     "<span style='font-size:0.82rem; color:#999;'>Export as PDF or Word</span>"
     "<span style='color:#c9a96e;'>\u2756</span>"
     "<span style='font-size:0.82rem; color:#999;'>7 Language Outputs</span>"
+    "</div></div>",
+    unsafe_allow_html=True
+)
+
+# ── Bring-your-own-keys notice ────────────────────────────────────────────────
+st.markdown(
+    "<div style='max-width:700px; margin:0 auto 1rem; background:#111;"
+    " border:1px solid #2a2a2a; border-left:3px solid #c9a96e; border-radius:12px;"
+    " padding:1.1rem 1.5rem; text-align:center;'>"
+    "<div style='font-size:0.9rem; color:#c9a96e; font-weight:600; margin-bottom:0.4rem;'>"
+    "🔑 Before you begin — this app runs on your own API keys</div>"
+    "<div style='font-size:0.82rem; color:#999; line-height:1.8;'>"
+    "Wisdom Distiller is offered freely as seva, but the AI services it uses "
+    "(Anthropic Claude for summarization, OpenAI Whisper for transcription) "
+    "require your personal API keys. Setup takes only a few minutes and costs "
+    "just a few cents per discourse. "
+    "Open the <b style='color:#b8a88a;'>sidebar on the left</b> for step-by-step "
+    "instructions to create both keys. Your keys are never stored."
     "</div></div>",
     unsafe_allow_html=True
 )
