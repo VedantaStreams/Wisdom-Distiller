@@ -21,29 +21,28 @@ st.markdown(SHARED_CSS, unsafe_allow_html=True)
 # ── Google Login Required ─────────────────────────────────────────────────────
 def require_login():
     is_logged_in = False
-    email = ""
+
+    # Streamlit 1.41+ uses st.experimental_user.is_logged_in
     try:
-        user = st.experimental_user
-        email = getattr(user, "email", "") or ""
-        is_logged_in = bool(email)
+        if st.experimental_user.is_logged_in:
+            is_logged_in = True
     except Exception:
         pass
 
+    # Older approach - check for email
     if not is_logged_in:
         try:
-            user = st.user
-            email = getattr(user, "email", "") or ""
-            is_logged_in = bool(email)
+            email = getattr(st.experimental_user, "email", "") or ""
+            if email:
+                is_logged_in = True
         except Exception:
             pass
 
+    # st.user (some versions)
     if not is_logged_in:
-        # Check if logged in via session state (post-redirect)
         try:
-            if hasattr(st, "experimental_user"):
-                u = st.experimental_user
-                if u and hasattr(u, "is_logged_in"):
-                    is_logged_in = u.is_logged_in
+            if st.user.is_logged_in:
+                is_logged_in = True
         except Exception:
             pass
 
