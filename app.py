@@ -18,69 +18,52 @@ st.set_page_config(
 
 st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
-# ── Google Login Required ─────────────────────────────────────────────────────
-def require_login():
-    is_logged_in = False
+# ── Google Login Handler ─────────────────────────────────────────────────────
+# Check login state using is_logged_in (Streamlit 1.40+)
+_user_logged_in = False
+_user_email     = ""
+_user_name      = ""
+try:
+    _user_logged_in = bool(st.experimental_user.is_logged_in)
+    if _user_logged_in:
+        _user_email = (st.experimental_user.email or "").lower().strip()
+        _user_name  = st.experimental_user.name or _user_email.split("@")[0]
+except Exception:
+    pass
 
-    # Streamlit 1.41+ uses st.experimental_user.is_logged_in
-    try:
-        if st.experimental_user.is_logged_in:
-            is_logged_in = True
-    except Exception:
-        pass
-
-    # Older approach - check for email
-    if not is_logged_in:
-        try:
-            email = getattr(st.experimental_user, "email", "") or ""
-            if email:
-                is_logged_in = True
-        except Exception:
-            pass
-
-    # st.user (some versions)
-    if not is_logged_in:
-        try:
-            if st.user.is_logged_in:
-                is_logged_in = True
-        except Exception:
-            pass
-
-    if not is_logged_in:
-        st.markdown("""
-<div style="text-align:center; padding:3rem 1rem;">
-    <div style="font-size:3rem; margin-bottom:1rem;">🕉️</div>
+# Show login page if not logged in
+if not _user_logged_in:
+    st.markdown("""
+<div style="text-align:center; padding:2rem 1rem 1rem;">
+    <div style="font-size:3rem; margin-bottom:0.8rem;">🕉️</div>
     <div style="font-family:'Cormorant Garamond',serif; font-size:2.2rem;
-    font-weight:600; color:#e8e0d4; margin-bottom:0.5rem;">
+    font-weight:600; color:#e8e0d4; margin-bottom:0.3rem;">
         Wisdom <span style="color:#c9a96e;">Distiller</span>
     </div>
-    <div style="font-size:0.9rem; color:#555; margin-bottom:2rem;">
-        Śravaṇa · Manana · Nididhyāsana
-    </div>
-    <div style="background:#111; border:1px solid #2a2a2a;
-    border-left:3px solid #c9a96e; border-radius:12px;
-    padding:1.5rem 2rem; max-width:420px; margin:0 auto 1.5rem;">
-        <div style="font-size:0.92rem; color:#888; line-height:1.9;">
-            Please sign in with your Google account to access
-            <b style="color:#b8a88a;">Wisdom Distiller</b>.<br/><br/>
-            New visitors receive <b style="color:#c9a96e;">5 free sessions</b>.
-            After that, simply enter your own API keys to continue
-            with unlimited access at minimal cost.
-        </div>
+    <div style="font-size:0.85rem; color:#555; margin-bottom:1.5rem;
+    letter-spacing:1px;">Śravaṇa · Manana · Nididhyāsana</div>
+</div>
+""", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("""
+<div style="background:#111; border:1px solid #2a2a2a;
+border-left:3px solid #c9a96e; border-radius:12px;
+padding:1.5rem 1.8rem; margin-bottom:1rem;">
+    <div style="font-size:0.92rem; color:#888; line-height:1.9; text-align:center;">
+        Sign in with Google to access Wisdom Distiller.<br/><br/>
+        <b style="color:#c9a96e;">New visitors get 5 free sessions.</b><br/>
+        After that, enter your own Anthropic and OpenAI API keys
+        to continue with unlimited access at minimal cost
+        (a few cents per session).
     </div>
 </div>
 """, unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col2:
-            if st.button("🔑  Sign in with Google",
-                         use_container_width=True, key="login_btn"):
-                try:
-                    st.login("google")
-                except Exception as e:
-                    st.error("Login error: " + str(e))
-        st.stop()
-
-require_login()
+        if st.button("🔑  Sign in with Google",
+                     use_container_width=True, key="login_btn"):
+            st.login("google")
+    st.stop()
 
 # ── iPhone home screen icon ────────────────────────────────────────────────────
 
@@ -190,6 +173,21 @@ with st.sidebar:
         f'<hr style="border-color:#1e1e1e; margin:0.8rem 0;"/>',
         unsafe_allow_html=True
     )
+    # Show signed-in user + sign out button
+    if _user_email:
+        st.markdown(
+            "<div style='font-size:0.72rem;color:#555;margin-bottom:0.1rem;'>"
+            "Signed in as</div>"
+            "<div style='font-size:0.78rem;color:#b8a88a;margin-bottom:0.4rem;'>"
+            + (_user_name or _user_email) + "</div>",
+            unsafe_allow_html=True
+        )
+        if st.button("Sign out", key="signout_btn"):
+            st.logout()
+        st.markdown(
+            "<hr style='border-color:#1e1e1e; margin:0.4rem 0 0.6rem;'/>",
+            unsafe_allow_html=True
+        )
 
     # ── API Keys ──────────────────────────────────────────────────────────────
     # Check if keys are pre-loaded via Streamlit Secrets (owner's deployment)
