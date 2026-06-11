@@ -12,5 +12,3 @@ primaryColor = "#c9a96e"
 [auth]
 redirect_uri = "https://wisdomdistiller.streamlit.app/oauth2callback"
 cookie_secret = "wisdom-distiller-secret-2026"
-
-
