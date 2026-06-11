@@ -84,7 +84,7 @@ study, teach, research, and serve in both academia and industry. I hold a
 <b style="color:#b8a88a;">PhD in Physics from the Indian Institute of Science</b> and
 spent many years teaching and mentoring students in engineering and science. I currently
 work in the field of AI and Data Science as a
-<b style="color:#b8a88a;">Senior Data Scientist / AI Engineer</b> at
+<b style="color:#b8a88a;">Senior Research Data Scientist / AI Engineer</b> at
 <a href="https://www.capitalone.com" target="_blank"
    style="color:#c9a96e; text-decoration:none; border-bottom:1px dashed #c9a96e;">Capital One</a>,
 focusing on machine learning, generative AI, and enterprise AI systems. Alongside my
