@@ -19,13 +19,13 @@ st.set_page_config(
 st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
 # ── Google Login Handler ─────────────────────────────────────────────────────
+# Using exact pattern from Streamlit docs
 _user_logged_in = False
 _user_email     = ""
 _user_name      = ""
 
-try:
-    if not st.user.is_logged_in:
-        st.markdown("""
+if not st.user.is_logged_in:
+    st.markdown("""
 <div style="text-align:center; padding:2rem 1rem 1rem;">
     <div style="font-size:3rem; margin-bottom:0.8rem;">🕉️</div>
     <div style="font-family:'Cormorant Garamond',serif; font-size:2.2rem;
@@ -36,9 +36,9 @@ try:
     letter-spacing:1px;">Śravaṇa · Manana · Nididhyāsana</div>
 </div>
 """, unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            st.markdown("""
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("""
 <div style="background:#111; border:1px solid #2a2a2a;
 border-left:3px solid #c9a96e; border-radius:12px;
 padding:1.5rem 1.8rem; margin-bottom:1.2rem;">
@@ -50,23 +50,16 @@ padding:1.5rem 1.8rem; margin-bottom:1.2rem;">
     </div>
 </div>
 """, unsafe_allow_html=True)
-            st.button(
-                "🔑  Sign in with Google",
-                on_click=st.login,
-                args=["google"],
-                use_container_width=True,
-                key="login_btn"
-            )
-        st.stop()
-    else:
-        _user_logged_in = True
-        _user_email = (st.user.email or "").lower().strip()
-        _user_name  = (st.user.name or "").strip()
-        if not _user_name and _user_email:
-            _user_name = _user_email.split("@")[0]
-except AttributeError:
-    # st.user not available — show home page without login
-    _user_logged_in = True
+        st.button("🔑  Sign in with Google",
+                  on_click=st.login, args=["google"],
+                  use_container_width=True)
+    st.stop()
+
+_user_logged_in = True
+_user_email = (st.user.email or "").lower().strip()
+_user_name  = (st.user.name or "").strip()
+if not _user_name and _user_email:
+    _user_name = _user_email.split("@")[0]
 
 # ── iPhone home screen icon ────────────────────────────────────────────────────
 
