@@ -264,11 +264,23 @@ TABLE_COLUMNS = {
 
 
 def summarize_text(transcript: str, style: str,
-                   columns: list, anthropic_key: str) -> str:
+                   columns: list, anthropic_key: str,
+                   custom_prompt: str = "") -> str:
     """Summarize transcript using Claude API."""
     import anthropic
     client = anthropic.Anthropic(api_key=anthropic_key)
     max_chars = 150_000
+
+    focus_note = ""
+    if custom_prompt and custom_prompt.strip():
+        focus_note = (
+            "\n\nSPECIAL FOCUS INSTRUCTIONS — apply these while creating the summary:\n"
+            + custom_prompt.strip()
+            + "\nReflect these focus areas naturally in the summary content — let them "
+            "shape what is included and emphasized. Do NOT insert inline annotation "
+            "labels such as [KEY EMPHASIS], [CROSS-REFERENCE], [ANALOGY], or "
+            "[SANSKRIT TERM] — produce clean, flowing output only."
+        )
 
     def call_claude(prompt: str, text: str, max_tokens: int = 2000) -> str:
         if len(text) > max_chars:
@@ -279,7 +291,7 @@ def summarize_text(transcript: str, style: str,
                     model="claude-sonnet-4-20250514",
                     max_tokens=1500,
                     messages=[{"role": "user",
-                                "content": f"Summarize this section:\n\n{part}"}],
+                                "content": f"Summarize this section.{focus_note}\n\n{part}"}],
                 )
                 summaries.append(msg.content[0].text)
             combined = "\n\n".join(summaries)
@@ -312,10 +324,11 @@ def summarize_text(transcript: str, style: str,
             f"CRITICAL: Any Sanskrit verse or shloka MUST appear in Devanāgarī script only "
             f"(never in Roman/English transliteration). After the Devanāgarī, provide meaning. "
             f"For Sanskrit terms, add meaning in parentheses."
+            + focus_note
         )
         return call_claude(prompt, transcript, max_tokens=3000)
     else:
-        prompt = STYLE_PROMPTS.get(style, STYLE_PROMPTS["Bullet highlights"])
+        prompt = STYLE_PROMPTS.get(style, STYLE_PROMPTS["Bullet highlights"]) + focus_note
         return call_claude(prompt, transcript)
 
 
