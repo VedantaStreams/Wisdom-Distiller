@@ -53,6 +53,31 @@ padding:1.5rem 1.8rem; margin-bottom:1.2rem;">
         st.button("🔑  Sign in with Google",
                   on_click=st.login, args=["google"],
                   use_container_width=True)
+
+        # ── Diagnostic (temporary) ────────────────────────────────────
+        with st.expander("🔍 Login diagnostic"):
+            try:
+                st.write("st.user object:")
+                st.json(st.user.to_dict())
+            except Exception as ex1:
+                try:
+                    st.write("is_logged_in:", st.user.is_logged_in)
+                except Exception as ex2:
+                    st.write("Error reading st.user:", str(ex1), str(ex2))
+            try:
+                import streamlit as _st_mod
+                st.write("Streamlit version:", _st_mod.__version__)
+            except Exception:
+                pass
+            try:
+                import authlib
+                st.write("Authlib version:", authlib.__version__)
+            except Exception as ex:
+                st.write("Authlib NOT installed:", str(ex))
+            st.write("auth in secrets:", "auth" in st.secrets)
+            if "auth" in st.secrets:
+                auth_keys = list(dict(st.secrets["auth"]).keys())
+                st.write("auth keys:", auth_keys)
     st.stop()
 
 _user_logged_in = True
