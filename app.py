@@ -348,23 +348,23 @@ nav_card(col5, "💎", "Wisdom Extractor",
          "Verbatim quotes · YouTube · Reels",
          "💎 Open Wisdom Extractor", "btn_wisdom",
          "pages/6_Wisdom_Extractor.py")
-nav_card(col6, "🕉️", "About the App",
-         "What makes Wisdom Distiller unique",
-         "🕉️ Open About", "btn_about",
-         "pages/7_About.py")
+nav_card(col6, "🪷", "Manana & Nididhyāsana Toolkit",
+         "Questions · Essence card · Revision plan · Flashcards",
+         "🪷 Open Toolkit", "btn_manana",
+         "pages/7_Manana_Toolkit.py")
 
 st.markdown("<br/>", unsafe_allow_html=True)
 
 # ── Row 3 ─────────────────────────────────────────────────────────────────────
 col7, col8, col9 = st.columns(3)
-nav_card(col7, "📱", "Get the App",
-         "Add Wisdom Distiller to your home screen",
-         "📱 Open Get the App", "btn_getapp",
-         "pages/9_Get_the_App.py")
+nav_card(col7, "🕉️", "About the App",
+         "What makes Wisdom Distiller unique",
+         "🕉️ Open About", "btn_about",
+         "pages/8_About.py")
 nav_card(col8, "❓", "FAQ",
          "Help · Getting started · Troubleshooting",
          "❓ Open FAQ", "btn_faq",
-         "pages/8_FAQ.py")
+         "pages/9_FAQ.py")
 nav_card(col9, "🌟", "Feedback & Reviews",
          "Share your experience · Read what others say",
          "🌟 Share Feedback", "btn_feedback",
