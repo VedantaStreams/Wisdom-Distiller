@@ -360,7 +360,7 @@ col7, col8, col9 = st.columns(3)
 nav_card(col7, "🕉️", "About the App",
          "What makes Wisdom Distiller unique",
          "🕉️ Open About", "btn_about",
-         "pages/8_About.py")
+         "pages/8_About_the_App.py")
 nav_card(col8, "❓", "FAQ",
          "Help · Getting started · Troubleshooting",
          "❓ Open FAQ", "btn_faq",
@@ -368,7 +368,7 @@ nav_card(col8, "❓", "FAQ",
 nav_card(col9, "🌟", "Feedback & Reviews",
          "Share your experience · Read what others say",
          "🌟 Share Feedback", "btn_feedback",
-         "pages/11_Feedback.py")
+         "pages/12_Feedback.py")
 
 st.markdown(
     "<div style='text-align:center; margin-top:0.5rem;'>"
