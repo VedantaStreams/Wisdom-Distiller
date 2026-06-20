@@ -15,8 +15,42 @@ st.set_page_config(
     page_title="Social Media Pack · Wisdom Distiller",
     page_icon="📲",
     layout="centered",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
+
+# ── Admin password gate — must come before ANYTHING else ──────────────────────
+_correct = st.secrets.get("SOCIAL_PACK_PASSWORD", "")
+
+if "smp_authenticated" not in st.session_state:
+    st.session_state["smp_authenticated"] = False
+
+if not st.session_state["smp_authenticated"]:
+    st.markdown("""
+    <div style='text-align:center;padding:4rem 1rem 2rem;'>
+        <div style='font-size:2.5rem;margin-bottom:1rem;'>🔒</div>
+        <div style='font-family:Cormorant Garamond,serif;font-size:1.4rem;
+        color:#e8e0d4;margin-bottom:0.5rem;'>Restricted Page</div>
+        <div style='font-size:0.82rem;color:#555;margin-bottom:1.5rem;'>
+        Enter your access code to continue.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_l, col_c, col_r = st.columns([1, 2, 1])
+    with col_c:
+        pwd_input = st.text_input(
+            "Access code", type="password",
+            key="smp_pwd_input",
+            placeholder="Enter access code…",
+            label_visibility="collapsed"
+        )
+        if st.button("🔓 Unlock", use_container_width=True, key="smp_unlock"):
+            if pwd_input == _correct:
+                st.session_state["smp_authenticated"] = True
+                st.rerun()
+            else:
+                st.error("Incorrect access code. Please try again.")
+    st.stop()
+
 st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
 # ── Sidebar ────────────────────────────────────────────────────────────────────
@@ -28,21 +62,6 @@ with st.sidebar:
             st.switch_page("app.py")
     st.markdown("<hr style='border-color:#1e1e1e; margin:0.3rem 0 0.8rem;'/>",
                 unsafe_allow_html=True)
-
-# ── Admin password gate ────────────────────────────────────────────────────────
-_pwd = st.text_input("🔒 Enter access code", type="password", key="smp_pwd")
-if _pwd != st.secrets.get("SOCIAL_PACK_PASSWORD", ""):
-    st.markdown(
-        "<div style='text-align:center;padding:3rem 1rem;'>"
-        "<div style='font-size:2rem;margin-bottom:1rem;'>🔒</div>"
-        "<div style='font-family:Cormorant Garamond,serif;font-size:1.2rem;"
-        "color:#888;'>This page is restricted.</div>"
-        "<div style='font-size:0.82rem;color:#555;margin-top:0.5rem;'>"
-        "Enter your access code above to continue.</div>"
-        "</div>",
-        unsafe_allow_html=True
-    )
-    st.stop()
 
 # ── API key ────────────────────────────────────────────────────────────────────
 anthropic_key = st.session_state.get("anthropic_key", "")
