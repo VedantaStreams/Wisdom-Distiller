@@ -288,7 +288,7 @@ def summarize_text(transcript: str, style: str,
             summaries = []
             for part in parts:
                 msg = client.messages.create(
-                    model="claude-sonnet-4-20250514",
+                    model="claude-sonnet-4-5",
                     max_tokens=1500,
                     messages=[{"role": "user",
                                 "content": f"Summarize this section.{focus_note}\n\n{part}"}],
@@ -296,7 +296,7 @@ def summarize_text(transcript: str, style: str,
                 summaries.append(msg.content[0].text)
             combined = "\n\n".join(summaries)
             final = client.messages.create(
-                model="claude-sonnet-4-20250514",
+                model="claude-sonnet-4-5",
                 max_tokens=max_tokens,
                 messages=[{"role": "user",
                             "content": f"{prompt}\n\n{combined}"}],
@@ -304,7 +304,7 @@ def summarize_text(transcript: str, style: str,
             return final.content[0].text
         else:
             msg = client.messages.create(
-                model="claude-sonnet-4-20250514",
+                model="claude-sonnet-4-5",
                 max_tokens=max_tokens,
                 messages=[{"role": "user",
                             "content": f"{prompt}\n\n{text}"}],
@@ -389,7 +389,7 @@ def structure_transcript(raw: str, anthropic_key: str,
     CHUNK = 80000
     if len(raw) <= CHUNK:
         msg = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5",
             max_tokens=8000,
             messages=[{"role": "user", "content": prompt + raw}]
         )
@@ -413,7 +413,7 @@ def structure_transcript(raw: str, anthropic_key: str,
             f"\n[Final part {chunk_num}/{total} - structure and add all end sections]\n"
         )
         msg = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5",
             max_tokens=8000,
             messages=[{"role": "user", "content": prompt + note + chunk}]
         )
@@ -458,7 +458,7 @@ def translate_text(text, language, anthropic_key):
 
     def call(t):
         msg = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5",
             max_tokens=4000,
             messages=[{"role": "user", "content": instruction + "\n\n" + t}],
         )
@@ -516,7 +516,7 @@ def analyze_discourse(
 
     try:
         msg = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-5",
             max_tokens=600,
             messages=[{"role": "user", "content": prompt}]
         )
