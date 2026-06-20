@@ -10,4 +10,4 @@ textColor = "#e8e0d4"
 primaryColor = "#c9a96e"
 
 [pages]
-exclude = ["pages/6b_Social_Media_Pack.py"]
+exclude = ["6b_Social_Media_Pack.py"]
