@@ -20,8 +20,6 @@ st.set_page_config(
 
 # ── Admin password gate — must come before ANYTHING else ──────────────────────
 _correct = st.secrets.get("SOCIAL_PACK_PASSWORD", "")
-st.write("Secret length:", len(_correct))
-st.write("Secret value:", repr(_correct))
 
 if "smp_authenticated" not in st.session_state:
     st.session_state["smp_authenticated"] = False
