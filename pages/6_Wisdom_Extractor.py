@@ -117,7 +117,7 @@ AVOID:
 - Incomplete or fragmented sentences
 - Filler or repetitive content
 
-TARGET: 8–12 quotes that together paint a vivid picture of the entire discourse.
+TARGET: {quote_count} quotes that together paint a vivid picture of the entire discourse.
 
 ==================================================================
 STEP 4 — THEMATIC TAGGING
@@ -138,12 +138,35 @@ E. HASHTAGS — 8–12: #Vedanta #Advaita #SelfKnowledge #Spirituality #Mindfuln
 ==================================================================
 OUTPUT — STRICT JSON ONLY, no markdown fences, no preamble, no explanation
 ==================================================================
+If group_by_topic is false:
 {
   "speaker": "name or Not specified",
   "topic": "topic or Not specified",
   "scripture": "scripture or Not specified",
+  "grouped": false,
   "quotes": [
     {"text": "exact verbatim quote as spoken", "theme": "Devotion"}
+  ],
+  "best_quote": "single most powerful verbatim quote",
+  "youtube_title": "Discourse | Topic | Core Insight",
+  "main_takeaway": "1-2 sentence essence of the discourse",
+  "reel_caption": "short emotionally engaging caption max 2 lines",
+  "hashtags": ["#vedanta", "#advaita", "#selfknowledge"]
+}
+
+If group_by_topic is true, replace "quotes" with "quote_groups":
+{
+  "speaker": "name or Not specified",
+  "topic": "topic or Not specified",
+  "scripture": "scripture or Not specified",
+  "grouped": true,
+  "quote_groups": [
+    {
+      "group_title": "Nature of the Mind",
+      "quotes": [
+        {"text": "exact verbatim quote", "theme": "Mind"}
+      ]
+    }
   ],
   "best_quote": "single most powerful verbatim quote",
   "youtube_title": "Discourse | Topic | Core Insight",
@@ -153,13 +176,27 @@ OUTPUT — STRICT JSON ONLY, no markdown fences, no preamble, no explanation
 }"""
 
 
-def call_extractor(transcript: str, anthropic_key: str) -> dict:
+def call_extractor(transcript: str, anthropic_key: str,
+                   quote_count: int = 10, group_by_topic: bool = False) -> dict:
     import anthropic as _anthropic
     client = _anthropic.Anthropic(api_key=anthropic_key)
+
+    # Build dynamic prompt with the user's choices injected
+    group_instruction = (
+        "GROUP BY TOPIC: Yes — organize quotes under descriptive topic headings "
+        "(3–6 groups). Use the quote_groups format in your JSON output."
+        if group_by_topic else
+        "GROUP BY TOPIC: No — return a flat list of quotes. Use the quotes format."
+    )
+    system = (
+        EXTRACTOR_PROMPT.replace("{quote_count}", str(quote_count))
+        + f"\n\n{group_instruction}"
+    )
+
     msg = client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-sonnet-4-5",
         max_tokens=4000,
-        system=EXTRACTOR_PROMPT,
+        system=system,
         messages=[{"role": "user", "content": f"Discourse transcript:\n\n{transcript}"}]
     )
     raw = msg.content[0].text.strip()
@@ -288,22 +325,48 @@ def render_results(result: dict):
         </div>""", unsafe_allow_html=True)
 
     # ── All quotes ────────────────────────────────────────────────────────────
-    quotes = result.get("quotes", [])
-    if quotes:
-        st.markdown("<br/>", unsafe_allow_html=True)
-        st.markdown("<div class='step-label'>All Extracted Quotes</div>", unsafe_allow_html=True)
-        for q in quotes:
-            theme = q.get("theme", "")
-            color = THEME_COLORS.get(theme, "#888")
-            text  = q.get("text", "")
-            st.markdown(f"""
-            <div style='background:#111;border:1px solid #1e1e1e;border-left:3px solid {color};
-            border-radius:10px;padding:1rem 1.4rem;margin-bottom:0.8rem;'>
-                <div style='font-size:0.7rem;color:{color};text-transform:uppercase;
-                letter-spacing:0.8px;margin-bottom:0.5rem;'>{theme}</div>
-                <div style='font-family:Cormorant Garamond,serif;font-style:italic;
-                font-size:0.98rem;color:#d4c9b8;line-height:1.8;'>"{text}"</div>
-            </div>""", unsafe_allow_html=True)
+    grouped = result.get("grouped", False)
+    st.markdown("<br/>", unsafe_allow_html=True)
+    st.markdown("<div class='step-label'>All Extracted Quotes</div>", unsafe_allow_html=True)
+
+    if grouped and result.get("quote_groups"):
+        for group in result["quote_groups"]:
+            group_title = group.get("group_title", "")
+            group_quotes = group.get("quotes", [])
+            st.markdown(
+                f"<div style='font-family:Cormorant Garamond,serif;font-size:1.05rem;"
+                f"color:#c9a96e;font-weight:600;margin:1.2rem 0 0.6rem;"
+                f"border-bottom:1px solid #2a2a2a;padding-bottom:0.3rem;'>"
+                f"🔹 {group_title}</div>",
+                unsafe_allow_html=True
+            )
+            for q in group_quotes:
+                theme = q.get("theme", "")
+                color = THEME_COLORS.get(theme, "#888")
+                text  = q.get("text", "")
+                st.markdown(f"""
+                <div style='background:#111;border:1px solid #1e1e1e;border-left:3px solid {color};
+                border-radius:10px;padding:1rem 1.4rem;margin-bottom:0.8rem;'>
+                    <div style='font-size:0.7rem;color:{color};text-transform:uppercase;
+                    letter-spacing:0.8px;margin-bottom:0.5rem;'>{theme}</div>
+                    <div style='font-family:Cormorant Garamond,serif;font-style:italic;
+                    font-size:0.98rem;color:#d4c9b8;line-height:1.8;'>"{text}"</div>
+                </div>""", unsafe_allow_html=True)
+    else:
+        quotes = result.get("quotes", [])
+        if quotes:
+            for q in quotes:
+                theme = q.get("theme", "")
+                color = THEME_COLORS.get(theme, "#888")
+                text  = q.get("text", "")
+                st.markdown(f"""
+                <div style='background:#111;border:1px solid #1e1e1e;border-left:3px solid {color};
+                border-radius:10px;padding:1rem 1.4rem;margin-bottom:0.8rem;'>
+                    <div style='font-size:0.7rem;color:{color};text-transform:uppercase;
+                    letter-spacing:0.8px;margin-bottom:0.5rem;'>{theme}</div>
+                    <div style='font-family:Cormorant Garamond,serif;font-style:italic;
+                    font-size:0.98rem;color:#d4c9b8;line-height:1.8;'>"{text}"</div>
+                </div>""", unsafe_allow_html=True)
 
     # ── Export ────────────────────────────────────────────────────────────────
     st.markdown("<br/>", unsafe_allow_html=True)
@@ -346,14 +409,16 @@ def render_results(result: dict):
         "  ALL EXTRACTED QUOTES",
         "══════════════════════════════════════════════════",
     ]
-    for i, q in enumerate(result.get("quotes", []), 1):
-        theme = q.get("theme", "").upper()
-        text  = q.get("text", "")
-        lines += [
-            "",
-            f"  {i}.  [ {theme} ]",
-            f'  "{text}"',
-        ]
+    if result.get("grouped") and result.get("quote_groups"):
+        for group in result["quote_groups"]:
+            lines += ["", f"  ── {group.get('group_title','').upper()} ──"]
+            for i, q in enumerate(group.get("quotes", []), 1):
+                lines += ["", f'  {i}. "{q.get("text","")}"']
+    else:
+        for i, q in enumerate(result.get("quotes", []), 1):
+            theme = q.get("theme", "").upper()
+            text  = q.get("text", "")
+            lines += ["", f"  {i}.  [ {theme} ]", f'  "{text}"']
     export_text = "\n".join(lines)
 
 
@@ -389,6 +454,11 @@ def render_results(result: dict):
                     f"### {i}. {q.get('theme','')}",
                     f'*"{q.get("text","")}"*',
                 ]
+            if result.get("grouped") and result.get("quote_groups"):
+                for group in result["quote_groups"]:
+                    md_lines += ["", f"### 🔹 {group.get('group_title','')}"]
+                    for i, q in enumerate(group.get("quotes", []), 1):
+                        md_lines += ["", f'*{i}. "{q.get("text","")}"*']
             pdf_content = "\n".join(md_lines)
             pdf = make_pdf("Wisdom Extractor", pdf_content,
                            speaker=result.get("speaker",""),
@@ -526,7 +596,41 @@ keyword_hints = st.text_input(
     label_visibility="collapsed"
 )
 
-# ── Step 3 — Extract ──────────────────────────────────────────────────────────
+st.markdown("<br/>", unsafe_allow_html=True)
+st.markdown(
+    "<div class='step-label'>Step 3 — Extraction Options</div>",
+    unsafe_allow_html=True
+)
+
+qc1, qc2 = st.columns([2, 1])
+with qc1:
+    st.markdown(
+        "<div style='font-size:0.82rem;color:#888;margin-bottom:0.4rem;'>"
+        "📊 <b style='color:#b8a88a;'>Number of quotes to extract</b></div>",
+        unsafe_allow_html=True
+    )
+    quote_count = st.slider(
+        "Number of quotes",
+        min_value=3, max_value=25, value=10, step=1,
+        key="qs_quote_count",
+        label_visibility="collapsed"
+    )
+    st.caption(f"Will extract approximately {quote_count} quotes")
+with qc2:
+    st.markdown(
+        "<div style='font-size:0.82rem;color:#888;margin-bottom:0.4rem;'>"
+        "🗂️ <b style='color:#b8a88a;'>Group by topic</b></div>",
+        unsafe_allow_html=True
+    )
+    group_by_topic = st.toggle(
+        "Group quotes by topic",
+        value=False,
+        key="qs_group_by_topic"
+    )
+    if group_by_topic:
+        st.caption("Quotes will be organized under topic headings")
+
+# ── Step 4 — Extract ──────────────────────────────────────────────────────────
 st.markdown("<br/>", unsafe_allow_html=True)
 if st.button("💎 Extract Wisdom", key="qs_process", use_container_width=True):
     if not transcript_text or not transcript_text.strip():
@@ -544,7 +648,11 @@ if st.button("💎 Extract Wisdom", key="qs_process", use_container_width=True):
             full_input = "\n".join(hints) + "\n\n" + transcript_text
         with st.spinner("Extracting wisdom from the discourse…"):
             try:
-                result = call_extractor(full_input, anthropic_key)
+                result = call_extractor(
+                    full_input, anthropic_key,
+                    quote_count=quote_count,
+                    group_by_topic=group_by_topic
+                )
                 st.session_state["qs_result"] = result
             except json.JSONDecodeError as e:
                 st.error(f"Could not parse AI response as JSON: {e}")
